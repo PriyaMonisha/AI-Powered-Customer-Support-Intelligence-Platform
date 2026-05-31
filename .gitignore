@@ -1,0 +1,68 @@
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+
+# Jupyter notebooks (use .py with # %% markers instead)
+*.ipynb
+.ipynb_checkpoints/
+
+# Environment secrets — NEVER commit
+.env
+*.env.local
+
+# Data — raw data stays local, never in git
+/data/raw/
+/data/processed/
+
+# ML artifacts — large files
+mlruns/
+/models/
+/artifacts/charts/
+/artifacts/drift/
+*.pkl
+*.pt
+*.h5
+*.onnx
+
+# MLflow DB
+mlflow.db
+
+# GloVe embeddings (large)
+glove.*.txt
+glove.*.zip
+
+# Logs
+*.log
+logs/
+
+# Claude memory and config — never in public repo
+.claude/
+CLAUDE.md
+INTERVIEW_PREP_*.md
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Docker
+.docker/
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
