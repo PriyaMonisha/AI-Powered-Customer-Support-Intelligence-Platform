@@ -92,9 +92,11 @@ class TabularEncoder:
         )
 
         tgt_arr = self.target_enc.transform(X[TARGET_ENC_FEATURES])
+        # get_feature_names_out() handles both target_type="continuous" (1 col/feature)
+        # and target_type="multiclass" (n_classes cols/feature — e.g., 5 cols for 5 Ticket Types)
         tgt_df  = pd.DataFrame(
             tgt_arr,
-            columns=[f"{c}_enc" for c in TARGET_ENC_FEATURES],
+            columns=self.target_enc.get_feature_names_out(),
             index=X.index,
         )
 
