@@ -43,20 +43,15 @@ from config import (
     LE_TYPE_PATH,
     LE_PRIORITY_PATH,
     REDIS_URL,
-    REDIS_FEATURE_TTL,
-    REDIS_KEY_PREFIX,
     MODELS_DIR,
-    PROCESSED_DATA_DIR,
 )
 from src.features.tabular_features import TabularEncoder, ALL_TABULAR_FEATURES
 from src.features.text_features import TextPreprocessor
 from src.features.feature_store import (
-    build_redis_key,        # imported here — NOT inside the loop
     queue_ticket_features,
-    read_ticket_features,
     _get_client,            # shares the feature_store default pool with FastAPI reads
 )
-from src.utils.helpers import NumpyEncoder, serialize_ticket_id
+from src.utils.helpers import serialize_ticket_id
 
 logging.basicConfig(
     level=logging.INFO,
@@ -183,6 +178,7 @@ X_train_tfidf = preprocessor.transform_tfidf(df_train["Ticket Description"])
 X_val_tfidf   = preprocessor.transform_tfidf(df_val["Ticket Description"])
 X_test_tfidf  = preprocessor.transform_tfidf(df_test["Ticket Description"])
 
+assert preprocessor.vectorizer_ is not None  # set by fit_tfidf() above
 logger.info(
     "TF-IDF vocab: %d | Train: %s | Val: %s | Test: %s",
     len(preprocessor.vectorizer_.vocabulary_),
@@ -311,11 +307,12 @@ if redis_available:
     # queue_ticket_features handles NumpyEncoder serialization and key hashing
     try:
         client = _get_client()
-        pipe   = client.pipeline(transaction=False)
-        for ticket_id, features in zip(train_ids, records):
-            queue_ticket_features(pipe, ticket_id, features)
-        pipe.execute()
-        logger.info("Redis: stored %d / %d train tickets", len(train_ids), len(df_train))
+        if client is not None:
+            pipe = client.pipeline(transaction=False)
+            for ticket_id, features in zip(train_ids, records):
+                queue_ticket_features(pipe, ticket_id, features)
+            pipe.execute()
+            logger.info("Redis: stored %d / %d train tickets", len(train_ids), len(df_train))
     except Exception as e:
         logger.warning("Redis pipeline failed: %s. Cache not populated.", e)
 

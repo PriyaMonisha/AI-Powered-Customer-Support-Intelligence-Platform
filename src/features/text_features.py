@@ -251,7 +251,7 @@ class TextPreprocessor:
         path.parent.mkdir(parents=True, exist_ok=True)
         tmp = path.with_suffix(".tmp")
         joblib.dump({"version": self.VERSION, "preprocessor": self}, tmp)
-        tmp.rename(path)
+        tmp.replace(path)  # Path.replace() overwrites destination atomically on all platforms
         logger.info("TextPreprocessor v%s saved to %s", self.VERSION, path)
 
     @classmethod
