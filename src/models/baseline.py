@@ -86,7 +86,7 @@ class BaselineClassifier:
         tmp = path.with_suffix(".tmp")
         try:
             joblib.dump(self, tmp)
-            tmp.rename(path)
+            tmp.replace(path)  # replace() overwrites atomically on Windows; rename() does not
         except Exception:
             tmp.unlink(missing_ok=True)
             raise

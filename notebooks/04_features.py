@@ -136,14 +136,18 @@ logger.info(
 )
 del _verify
 
-# ── Sub-DataFrames (reset_index preserves row-order contract with .npy arrays) ─
-df_train = df.iloc[idx_train].reset_index(drop=True)
-df_val   = df.iloc[idx_val].reset_index(drop=True)
-df_test  = df.iloc[idx_test].reset_index(drop=True)
+# ── Sub-DataFrames — sort by Ticket ID so row order matches split_indices.json ──
+# split_indices.json stores sorted Ticket IDs. The Colab reload pattern uses:
+#   df_test = df[df["Ticket ID"].isin(splits["test"])].reset_index(drop=True)
+# .isin() preserves CSV row order, which for this dataset is ≈ sorted by Ticket ID.
+# Sorting here ensures saved .npy arrays and the Colab reload produce identical row order.
+df_train = df.iloc[idx_train].sort_values("Ticket ID").reset_index(drop=True)
+df_val   = df.iloc[idx_val].sort_values("Ticket ID").reset_index(drop=True)
+df_test  = df.iloc[idx_test].sort_values("Ticket ID").reset_index(drop=True)
 
-# Colab reload pattern (for Sections 8/9):
+# Colab reload pattern (for Sections 8/9) — produces the same row order as above:
 # with open(SPLIT_INDICES_PATH) as f: splits = json.load(f)
-# df_test = df[df["Ticket ID"].isin(splits["test"])].reset_index(drop=True)
+# df_test = df[df["Ticket ID"].isin(splits["test"])].sort_values("Ticket ID").reset_index(drop=True)
 
 logger.info(
     "Split: train=%d  val=%d  test=%d  (total=%d)",
