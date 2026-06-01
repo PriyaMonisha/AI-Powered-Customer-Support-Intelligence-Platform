@@ -17,6 +17,7 @@ ARTIFACTS_DIR = PROJECT_ROOT / "artifacts"
 
 RAW_DATA_DIR       = DATA_DIR / "raw"
 PROCESSED_DATA_DIR = DATA_DIR / "processed"
+PREPROCESSED_DATA_PATH = PROCESSED_DATA_DIR / "preprocessed_tickets.csv"
 CHARTS_DIR         = ARTIFACTS_DIR / "charts"
 REPORTS_DIR        = ARTIFACTS_DIR / "reports"
 DRIFT_DIR          = ARTIFACTS_DIR / "drift"
@@ -86,6 +87,10 @@ FULL_CV_FOLDS  = 5
 # TF-IDF settings
 TFIDF_MAX_FEATURES = 10_000
 TFIDF_NGRAM_RANGE  = (1, 2)
+
+# VADER sentiment thresholds (standard boundaries per VADER paper)
+VADER_POSITIVE_THRESHOLD =  0.05
+VADER_NEGATIVE_THRESHOLD = -0.05
 
 # Redis feature store
 REDIS_FEATURE_TTL = 86_400   # 24 hours (seconds)
