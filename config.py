@@ -57,8 +57,10 @@ SLA_LOW_HOURS      = 168    # 7 days
 # ---------------------------------------------------------------------------
 # Standardized model artifact paths (all sections reference these — no ad-hoc filenames)
 # ---------------------------------------------------------------------------
-LIGHTGBM_CLASSIFIER_PATH = MODELS_DIR / "lightgbm_classifier.pkl"
-XGBOOST_REGRESSOR_PATH   = MODELS_DIR / "xgboost_regressor.pkl"
+BASELINE_TYPE_PATH         = MODELS_DIR / "baseline_type_classifier.pkl"
+BASELINE_PRIORITY_PATH     = MODELS_DIR / "baseline_priority_classifier.pkl"
+LIGHTGBM_CLASSIFIER_PATH   = MODELS_DIR / "lightgbm_classifier.pkl"
+XGBOOST_REGRESSOR_PATH     = MODELS_DIR / "xgboost_regressor.pkl"
 BILSTM_PATH              = MODELS_DIR / "bilstm.pt"
 DISTILBERT_PATH          = MODELS_DIR / "distilbert"    # directory (save_pretrained output)
 SHAP_EXPLAINER_PATH      = MODELS_DIR / "shap_explainer.pkl"
