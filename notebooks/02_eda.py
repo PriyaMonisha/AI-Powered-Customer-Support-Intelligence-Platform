@@ -73,11 +73,13 @@ print("=" * 60)
 
 # ── eda_01: Ticket Type (5-class primary target) ──────────────────────────
 type_counts = df["Ticket Type"].value_counts()
-colors_type = sns.color_palette("Set2", len(type_counts))
+# Reverse so largest bar appears at the top (barh plots first element at bottom)
+tc_plot = type_counts[::-1]
+colors_type = sns.color_palette("Set2", len(tc_plot))[::-1]
 
 fig, ax = plt.subplots(figsize=(10, 5))
-bars = ax.barh(type_counts.index, type_counts.values, color=colors_type)
-for bar, count in zip(bars, type_counts.values):
+bars = ax.barh(tc_plot.index, tc_plot.values, color=colors_type)
+for bar, count in zip(bars, tc_plot.values):
     pct = count / len(df) * 100
     ax.text(
         bar.get_width() + 15,
@@ -101,11 +103,13 @@ priority_display_order = [
     p for p in ["Critical", "High", "Medium", "Low"] if p in priority_counts.index
 ]
 priority_counts = priority_counts.reindex(priority_display_order, fill_value=0)
-colors_pri = sns.color_palette("Set2", len(priority_counts))
+# Reverse so Critical (most urgent) appears at the top
+pc_plot = priority_counts[::-1]
+colors_pri = sns.color_palette("Set2", len(pc_plot))[::-1]
 
 fig, ax = plt.subplots(figsize=(9, 4))
-bars = ax.barh(priority_counts.index, priority_counts.values, color=colors_pri)
-for bar, count in zip(bars, priority_counts.values):
+bars = ax.barh(pc_plot.index, pc_plot.values, color=colors_pri)
+for bar, count in zip(bars, pc_plot.values):
     pct = count / len(df) * 100
     ax.text(
         bar.get_width() + 10,
@@ -155,7 +159,8 @@ col_order = [p for p in ["Critical", "High", "Medium", "Low"] if p in ct.columns
 ct = ct.reindex(columns=col_order)
 
 fig, ax = plt.subplots(figsize=(9, 5))
-sns.heatmap(ct, annot=True, fmt=".1%", cmap="Blues", ax=ax, linewidths=0.5, linecolor="white")
+sns.heatmap(ct, annot=True, fmt=".1%", cmap="Blues", ax=ax, linewidths=0.5, linecolor="white",
+            vmin=0, vmax=0.35)
 ax.set_title("Ticket Priority by Type\n(row-normalized — proportion within each type)")
 ax.set_xlabel("Ticket Priority")
 ax.set_ylabel("Ticket Type")
@@ -349,21 +354,22 @@ print("\n" + "=" * 60)
 print("BLOCK 5 — TEXT ANALYSIS")
 print("=" * 60)
 
-# ── eda_14: Top-20 Ticket Subjects ────────────────────────────────────────
-top20 = df["Ticket Subject"].value_counts().head(20)
-top20.index = top20.index.str[:40]   # truncate long labels to prevent layout overflow
+# ── eda_14: Ticket Subject distribution (show all unique subjects) ─────────
+top20 = df["Ticket Subject"].value_counts()   # all subjects — dataset has 16 unique
+top20.index = top20.index.str[:40]            # truncate labels to prevent overflow
+n_subjects = len(top20)
 
-fig, ax = plt.subplots(figsize=(11, 7))
+fig, ax = plt.subplots(figsize=(11, 9))
 color_subject = sns.color_palette("Set2")[0]
-ax.barh(range(len(top20)), top20.values[::-1], color=color_subject)
-ax.set_yticks(range(len(top20)))
+ax.barh(range(n_subjects), top20.values[::-1], color=color_subject)
+ax.set_yticks(range(n_subjects))
 ax.set_yticklabels(top20.index[::-1], fontsize=9)
 ax.set_xlabel("Count")
-ax.set_title("Top-20 Most Common Ticket Subjects")
+ax.set_title(f"Ticket Subject Distribution (all {n_subjects} unique subjects)")
 plt.tight_layout()
 save_chart(CHARTS_DIR / "eda_14_subject_top20.png")
 
-print(f"\nTop-5 Ticket Subjects:\n{top20.head(5).to_string()}")
+print(f"\nAll {n_subjects} Ticket Subjects:\n{top20.to_string()}")
 
 # %% ── 6. Findings summary ────────────────────────────────────────────────────
 print("\n" + "=" * 60)
