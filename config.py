@@ -59,8 +59,16 @@ SLA_LOW_HOURS      = 168    # 7 days
 # ---------------------------------------------------------------------------
 BASELINE_TYPE_PATH         = MODELS_DIR / "baseline_type_classifier.pkl"
 BASELINE_PRIORITY_PATH     = MODELS_DIR / "baseline_priority_classifier.pkl"
-LIGHTGBM_CLASSIFIER_PATH   = MODELS_DIR / "lightgbm_classifier.pkl"
 XGBOOST_REGRESSOR_PATH     = MODELS_DIR / "xgboost_regressor.pkl"
+
+# Section 6 — advanced classifier paths (RF / XGBoost / LightGBM, one pkl per task)
+RF_TYPE_PATH         = MODELS_DIR / "rf_type_classifier.pkl"
+RF_PRIORITY_PATH     = MODELS_DIR / "rf_priority_classifier.pkl"
+XGB_TYPE_PATH        = MODELS_DIR / "xgb_type_classifier.pkl"
+XGB_PRIORITY_PATH    = MODELS_DIR / "xgb_priority_classifier.pkl"
+LGBM_TYPE_PATH       = MODELS_DIR / "lgbm_type_classifier.pkl"
+LGBM_PRIORITY_PATH   = MODELS_DIR / "lgbm_priority_classifier.pkl"
+LIGHTGBM_CLASSIFIER_PATH = LGBM_PRIORITY_PATH   # alias — remove after S11 wires FastAPI
 BILSTM_PATH              = MODELS_DIR / "bilstm.pt"
 DISTILBERT_PATH          = MODELS_DIR / "distilbert"    # directory (save_pretrained output)
 SHAP_EXPLAINER_PATH      = MODELS_DIR / "shap_explainer.pkl"
