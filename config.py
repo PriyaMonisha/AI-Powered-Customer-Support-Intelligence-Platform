@@ -75,6 +75,12 @@ RF_REGRESSOR_PATH   = MODELS_DIR / "rf_regressor.pkl"
 LGBM_REGRESSOR_PATH = MODELS_DIR / "lgbm_regressor.pkl"
 BILSTM_PATH              = MODELS_DIR / "bilstm.pt"
 DISTILBERT_PATH          = MODELS_DIR / "distilbert"    # directory (save_pretrained output)
+DISTILBERT_MAX_LENGTH: int       = 128   # token limit — max text ~90 tokens, 128 gives headroom
+DISTILBERT_HF_REPO:   str | None = (     # HF Hub repo; None if HF_USERNAME not set
+    f"{HF_USERNAME}/csip-distilbert"
+    if HF_USERNAME and HF_USERNAME.strip()
+    else None
+)
 
 # Section 8 — clustering + explainability paths
 KMEANS_MODEL_PATH              = MODELS_DIR / "kmeans_model.pkl"
