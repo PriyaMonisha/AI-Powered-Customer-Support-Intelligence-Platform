@@ -27,6 +27,7 @@ mlruns/
 /models/
 /artifacts/charts/
 /artifacts/drift/
+/artifacts/tmp/
 *.pkl
 *.pt
 *.h5

@@ -69,6 +69,10 @@ XGB_PRIORITY_PATH    = MODELS_DIR / "xgb_priority_classifier.pkl"
 LGBM_TYPE_PATH       = MODELS_DIR / "lgbm_type_classifier.pkl"
 LGBM_PRIORITY_PATH   = MODELS_DIR / "lgbm_priority_classifier.pkl"
 LIGHTGBM_CLASSIFIER_PATH = LGBM_PRIORITY_PATH   # alias — remove after S11 wires FastAPI
+
+# Section 7 — regression paths
+RF_REGRESSOR_PATH   = MODELS_DIR / "rf_regressor.pkl"
+LGBM_REGRESSOR_PATH = MODELS_DIR / "lgbm_regressor.pkl"
 BILSTM_PATH              = MODELS_DIR / "bilstm.pt"
 DISTILBERT_PATH          = MODELS_DIR / "distilbert"    # directory (save_pretrained output)
 SHAP_EXPLAINER_PATH      = MODELS_DIR / "shap_explainer.pkl"
