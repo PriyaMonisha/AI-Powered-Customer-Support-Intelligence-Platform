@@ -1,0 +1,62 @@
+{
+  "section": 10,
+  "total_mlflow_runs": 47,
+  "runs_per_experiment": {
+    "csip-baseline-classifiers": 18,
+    "csip-advanced-classifiers": 17,
+    "csip-regression-models": 6,
+    "csip-clustering": 1,
+    "csip-explainability": 2,
+    "csip-distilbert-text": 0,
+    "csip-bilstm-text": 0,
+    "csip-model-registry": 3
+  },
+  "registered_models": [
+    {
+      "registered_name": "csip-ticket-type-classifier",
+      "run_id": "3ee37ca7856d47189d58edfedb4b4552",
+      "production_version": 1,
+      "challenger_version": 2,
+      "production_algo": "lgbm",
+      "challenger_algo": "xgb"
+    },
+    {
+      "registered_name": "csip-priority-classifier",
+      "run_id": "137101c3eef14e508833dffffa99b6b7",
+      "production_version": 1,
+      "challenger_version": 2,
+      "production_algo": "xgb",
+      "challenger_algo": "rf"
+    },
+    {
+      "registered_name": "csip-resolution-regressor",
+      "run_id": "67f66112ba16437a9d494a700e61a1ba",
+      "production_version": 1,
+      "challenger_version": 2,
+      "production_algo": "rf",
+      "challenger_algo": "xgb"
+    }
+  ],
+  "best_models": {
+    "ticket_type": {
+      "algo": "lgbm",
+      "val_f1_macro": 0.199744,
+      "registered_name": "csip-ticket-type-classifier"
+    },
+    "ticket_priority": {
+      "algo": "xgb",
+      "val_f1_macro": 0.27863,
+      "registered_name": "csip-priority-classifier"
+    },
+    "resolution_time": {
+      "algo": "rf",
+      "val_rmse": 7.073703,
+      "registered_name": "csip-resolution-regressor"
+    }
+  },
+  "notes": [
+    "S9 (DistilBERT) and S8a (BiLSTM) pending Colab run \u2014 not yet in registry.",
+    "Classical ML on Ticket Type hits noise floor F1\u22480.20; DistilBERT is primary classifier.",
+    "All R\u00b2\u22480 for regression \u2014 synthetic uniform timestamps carry no tabular signal."
+  ]
+}
