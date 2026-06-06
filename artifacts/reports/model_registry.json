@@ -1,0 +1,16 @@
+{
+  "ticket_type": {
+    "section": 6,
+    "algo": "lgbm",
+    "val_f1_macro": 0.199744,
+    "vs_baseline": 0.006844,
+    "artifact": "models\\lgbm_type_classifier.pkl"
+  },
+  "ticket_priority": {
+    "section": 6,
+    "algo": "xgb",
+    "val_f1_macro": 0.262538,
+    "vs_baseline": 0.020757,
+    "artifact": "models\\xgb_priority_classifier.pkl"
+  }
+}

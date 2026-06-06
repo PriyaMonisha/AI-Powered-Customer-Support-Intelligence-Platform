@@ -1,0 +1,141 @@
+{
+  "section": "8c",
+  "fast_mode": true,
+  "generated_at": "2026-06-06T18:27:38.079717",
+  "priority_explainer": {
+    "model": "lgbm",
+    "task": "ticket_priority",
+    "n_samples": 847,
+    "n_features": 17,
+    "top_features": [
+      {
+        "feature": "days_since_purchase",
+        "mean_abs_shap": 0.053601
+      },
+      {
+        "feature": "sentiment_compound",
+        "mean_abs_shap": 0.040505
+      },
+      {
+        "feature": "Customer Age",
+        "mean_abs_shap": 0.03649
+      },
+      {
+        "feature": "char_count",
+        "mean_abs_shap": 0.035957
+      },
+      {
+        "feature": "response_hour_of_day",
+        "mean_abs_shap": 0.029988
+      },
+      {
+        "feature": "Product Purchased_Technical issue",
+        "mean_abs_shap": 0.026158
+      },
+      {
+        "feature": "word_count",
+        "mean_abs_shap": 0.023754
+      },
+      {
+        "feature": "Ticket Channel_enc",
+        "mean_abs_shap": 0.023589
+      },
+      {
+        "feature": "Product Purchased_Billing inquiry",
+        "mean_abs_shap": 0.021501
+      },
+      {
+        "feature": "Product Purchased_Product inquiry",
+        "mean_abs_shap": 0.01961
+      },
+      {
+        "feature": "Product Purchased_Refund request",
+        "mean_abs_shap": 0.018595
+      },
+      {
+        "feature": "Product Purchased_Cancellation request",
+        "mean_abs_shap": 0.01439
+      },
+      {
+        "feature": "Customer Gender_enc",
+        "mean_abs_shap": 0.008384
+      },
+      {
+        "feature": "is_resolved",
+        "mean_abs_shap": 0.005385
+      },
+      {
+        "feature": "has_first_response",
+        "mean_abs_shap": 0.000426
+      },
+      {
+        "feature": "csat_available",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "subject_word_count",
+        "mean_abs_shap": 0.0
+      }
+    ]
+  },
+  "regressor_explainer": {
+    "model": "lgbm",
+    "task": "hours_to_resolve",
+    "n_samples": 276,
+    "n_features": 13,
+    "top_features": [
+      {
+        "feature": "response_hour_of_day",
+        "mean_abs_shap": 0.243643
+      },
+      {
+        "feature": "Customer Age",
+        "mean_abs_shap": 0.242509
+      },
+      {
+        "feature": "days_since_purchase",
+        "mean_abs_shap": 0.189188
+      },
+      {
+        "feature": "sentiment_compound",
+        "mean_abs_shap": 0.165849
+      },
+      {
+        "feature": "Ticket Channel_enc",
+        "mean_abs_shap": 0.157759
+      },
+      {
+        "feature": "Product Purchased_Refund request",
+        "mean_abs_shap": 0.150065
+      },
+      {
+        "feature": "word_count",
+        "mean_abs_shap": 0.137912
+      },
+      {
+        "feature": "char_count",
+        "mean_abs_shap": 0.121989
+      },
+      {
+        "feature": "Product Purchased_Product inquiry",
+        "mean_abs_shap": 0.105883
+      },
+      {
+        "feature": "Product Purchased_Billing inquiry",
+        "mean_abs_shap": 0.092875
+      },
+      {
+        "feature": "Product Purchased_Cancellation request",
+        "mean_abs_shap": 0.085539
+      },
+      {
+        "feature": "Product Purchased_Technical issue",
+        "mean_abs_shap": 0.068644
+      },
+      {
+        "feature": "Customer Gender_enc",
+        "mean_abs_shap": 0.022508
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "ticket_type": {
+    "model": "lgbm",
+    "auto_route": {
+      "threshold": 0.35,
+      "precision_val": 1.0,
+      "coverage_val": 0.002361,
+      "precision_test": 0.111111,
+      "coverage_test": 0.005313,
+      "precision_gap": 0.888889
+    },
+    "flag_review": null,
+    "note": "WARNING: gap 0.889 > 0.05 -- threshold not fully validated"
+  },
+  "ticket_priority": {
+    "model": "xgb",
+    "auto_route": null,
+    "flag_review": null,
+    "note": "auto-route threshold not achievable at 85% precision"
+  }
+}

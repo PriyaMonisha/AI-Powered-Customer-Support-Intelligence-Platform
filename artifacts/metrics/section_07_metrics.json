@@ -1,0 +1,98 @@
+{
+  "section": 7,
+  "fast_mode": true,
+  "log_transform": false,
+  "generated_at": "2026-06-06T12:29:26.471904+00:00",
+  "n_train": 1931,
+  "n_val": 276,
+  "n_test": 562,
+  "n_features": 13,
+  "feature_names": [
+    "Ticket Channel_enc",
+    "Customer Gender_enc",
+    "Product Purchased_Billing inquiry",
+    "Product Purchased_Cancellation request",
+    "Product Purchased_Product inquiry",
+    "Product Purchased_Refund request",
+    "Product Purchased_Technical issue",
+    "Customer Age",
+    "days_since_purchase",
+    "response_hour_of_day",
+    "char_count",
+    "word_count",
+    "sentiment_compound"
+  ],
+  "dropped_columns": [
+    "is_resolved",
+    "has_first_response",
+    "csat_available",
+    "subject_word_count"
+  ],
+  "models": {
+    "rf": {
+      "val_rmse": 7.073703,
+      "val_mae": 6.150523,
+      "val_r2": -0.006017,
+      "val_mape": 283.17786,
+      "val_rmsle": 0.811587,
+      "test_rmse": 6.998102,
+      "test_mae": 6.166636,
+      "test_r2": -0.003056,
+      "test_mape": 365.762397,
+      "test_rmsle": 0.762395,
+      "best_params": {
+        "n_estimators": 94,
+        "max_depth": 3,
+        "min_samples_leaf": 14,
+        "max_features": "sqrt"
+      },
+      "n_trials": 5
+    },
+    "xgb": {
+      "val_rmse": 7.307528,
+      "val_mae": 6.295991,
+      "val_r2": -0.073625,
+      "val_mape": 262.658025,
+      "val_rmsle": 0.821093,
+      "test_rmse": 7.26137,
+      "test_mae": 6.343208,
+      "test_r2": -0.079946,
+      "test_mape": 395.690321,
+      "test_rmsle": 0.775992,
+      "best_params": {
+        "n_estimators": 172,
+        "max_depth": 7,
+        "learning_rate": 0.03079192528592716,
+        "subsample": 0.6896611534786758,
+        "colsample_bytree": 0.6520809791335554
+      },
+      "n_trials": 5
+    },
+    "lgbm": {
+      "val_rmse": 7.117125,
+      "val_mae": 6.145567,
+      "val_r2": -0.018406,
+      "val_mape": 270.908702,
+      "val_rmsle": 0.813721,
+      "test_rmse": 7.113859,
+      "test_mae": 6.230691,
+      "test_r2": -0.036514,
+      "test_mape": 385.881085,
+      "test_rmsle": 0.771241,
+      "best_params": {
+        "max_depth": 12,
+        "n_estimators": 60,
+        "num_leaves": 79,
+        "learning_rate": 0.015571578207532273,
+        "min_child_samples": 18
+      },
+      "n_trials": 5
+    }
+  },
+  "best_model": {
+    "algo": "rf",
+    "val_rmse": 7.073703,
+    "test_rmse": 6.998102,
+    "artifact": "models\\rf_regressor.pkl"
+  }
+}

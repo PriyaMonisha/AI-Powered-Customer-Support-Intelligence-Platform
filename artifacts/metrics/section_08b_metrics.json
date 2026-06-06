@@ -1,0 +1,49 @@
+{
+  "section": "8b",
+  "fast_mode": true,
+  "generated_at": "2026-06-06T18:10:33.206022",
+  "k_range": [
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "best_k": 2,
+  "best_silhouette": 0.15734,
+  "best_inertia": 80807.478817,
+  "cluster_sizes": {
+    "0": 1931,
+    "1": 3997
+  },
+  "pca_explained_var": [
+    0.170389,
+    0.120179
+  ],
+  "all_k_results": {
+    "2": {
+      "silhouette": 0.15734,
+      "inertia": 80807.478817
+    },
+    "3": {
+      "silhouette": 0.132698,
+      "inertia": 73931.302255
+    },
+    "4": {
+      "silhouette": 0.129945,
+      "inertia": 69458.348026
+    },
+    "5": {
+      "silhouette": 0.119421,
+      "inertia": 67460.374845
+    },
+    "6": {
+      "silhouette": 0.096723,
+      "inertia": 65758.569629
+    }
+  },
+  "artifacts": {
+    "model": "models\\kmeans_model.pkl",
+    "scaler": "models\\kmeans_scaler.pkl"
+  }
+}

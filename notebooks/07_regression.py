@@ -59,6 +59,8 @@ from config import (
     MLFLOW_TRACKING_URI,
     MODELS_DIR,
     RANDOM_STATE,
+    REGRESSOR_FEATURE_NAMES_PATH,
+    REGRESSOR_KEEP_MASK_PATH,
     RF_REGRESSOR_PATH,
     XGBOOST_REGRESSOR_PATH,
 )
@@ -136,6 +138,15 @@ logger.info("Dropped %d constant columns: %s", len(drop_indices), sorted(detecte
 logger.info("Regression features (%d): %s", len(reg_col_names), reg_col_names)
 
 X = {s: X[s][:, keep_mask] for s in ["train", "val", "test"]}
+
+# Persist keep_mask so Section 8c loads it instead of recomputing.
+# Recomputation is non-deterministic if train data or first-row values change across runs.
+_keep_mask_bool = np.zeros(len(tab_col_names), dtype=bool)
+_keep_mask_bool[keep_mask] = True
+np.save(REGRESSOR_KEEP_MASK_PATH, _keep_mask_bool)
+with open(REGRESSOR_FEATURE_NAMES_PATH, "w") as _fh:
+    json.dump(reg_col_names, _fh, indent=2)
+logger.info("Saved regressor keep_mask (%d features) to %s", int(_keep_mask_bool.sum()), REGRESSOR_KEEP_MASK_PATH)
 
 # Target distribution — data-driven log transform decision
 skewness = _skewness(y["train"])

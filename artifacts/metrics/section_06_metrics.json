@@ -1,0 +1,83 @@
+{
+  "section": 6,
+  "fast_mode": true,
+  "generated_at": "2026-06-01T16:04:14.254818+00:00",
+  "models": {
+    "rf_type": {
+      "val_f1_macro": 0.179536,
+      "n_trials": 3,
+      "best_params": {
+        "n_estimators": 51,
+        "max_depth": 11,
+        "min_samples_leaf": 19,
+        "max_features": "sqrt"
+      }
+    },
+    "rf_priority": {
+      "val_f1_macro": 0.255843,
+      "n_trials": 3,
+      "best_params": {
+        "n_estimators": 122,
+        "max_depth": 14,
+        "min_samples_leaf": 11,
+        "max_features": "log2"
+      }
+    },
+    "xgb_type": {
+      "val_f1_macro": 0.189758,
+      "n_trials": 3,
+      "best_params": {
+        "n_estimators": 141,
+        "max_depth": 3,
+        "learning_rate": 0.02699653976910025,
+        "subsample": 0.8011856453441771,
+        "colsample_bytree": 0.9641317982151397
+      }
+    },
+    "xgb_priority": {
+      "val_f1_macro": 0.262538,
+      "n_trials": 3,
+      "best_params": {
+        "n_estimators": 225,
+        "max_depth": 7,
+        "learning_rate": 0.05729081604647945,
+        "subsample": 0.6393066484264399,
+        "colsample_bytree": 0.6274993256520016
+      }
+    },
+    "lgbm_type": {
+      "val_f1_macro": 0.199744,
+      "n_trials": 3,
+      "best_params": {
+        "max_depth": 9,
+        "n_estimators": 175,
+        "num_leaves": 11,
+        "learning_rate": 0.012367890151446057,
+        "min_child_samples": 26
+      }
+    },
+    "lgbm_priority": {
+      "val_f1_macro": 0.23704,
+      "n_trials": 3,
+      "best_params": {
+        "max_depth": 13,
+        "n_estimators": 237,
+        "num_leaves": 14,
+        "learning_rate": 0.021625848951315692,
+        "min_child_samples": 26
+      }
+    }
+  },
+  "best_per_task": {
+    "ticket_type": {
+      "algo": "lgbm",
+      "val_f1_macro": 0.199744,
+      "artifact": "models\\lgbm_type_classifier.pkl"
+    },
+    "ticket_priority": {
+      "algo": "xgb",
+      "val_f1_macro": 0.262538,
+      "artifact": "models\\xgb_priority_classifier.pkl"
+    }
+  }
+}

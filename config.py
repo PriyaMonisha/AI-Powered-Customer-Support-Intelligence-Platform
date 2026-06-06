@@ -75,7 +75,17 @@ RF_REGRESSOR_PATH   = MODELS_DIR / "rf_regressor.pkl"
 LGBM_REGRESSOR_PATH = MODELS_DIR / "lgbm_regressor.pkl"
 BILSTM_PATH              = MODELS_DIR / "bilstm.pt"
 DISTILBERT_PATH          = MODELS_DIR / "distilbert"    # directory (save_pretrained output)
-SHAP_EXPLAINER_PATH      = MODELS_DIR / "shap_explainer.pkl"
+
+# Section 8 — clustering + explainability paths
+KMEANS_MODEL_PATH              = MODELS_DIR / "kmeans_model.pkl"
+KMEANS_SCALER_PATH             = MODELS_DIR / "kmeans_scaler.pkl"
+SHAP_EXPLAINER_PRIORITY_PATH   = MODELS_DIR / "shap_explainer_priority.pkl"
+SHAP_EXPLAINER_REGRESSOR_PATH  = MODELS_DIR / "shap_explainer_regressor.pkl"
+SHAP_EXPLAINER_PATH            = SHAP_EXPLAINER_PRIORITY_PATH   # backward-compat alias
+BILSTM_VOCAB_PATH              = MODELS_DIR / "bilstm_vocab.json"
+BILSTM_EMBEDDING_MATRIX_PATH   = MODELS_DIR / "bilstm_embedding_matrix.npy"
+REGRESSOR_KEEP_MASK_PATH       = MODELS_DIR / "regressor_keep_mask.npy"
+REGRESSOR_FEATURE_NAMES_PATH   = MODELS_DIR / "regressor_feature_names.json"
 SPLIT_INDICES_PATH       = PROCESSED_DATA_DIR / "split_indices.json"
 TABULAR_ENCODER_PATH     = MODELS_DIR / "tabular_encoder.pkl"
 PREPROCESSOR_PATH        = MODELS_DIR / "preprocessor.pkl"
