@@ -5,7 +5,7 @@
 # =============================================================================
 # Cell 1 — Constants (NO imports, NO function calls — must run first, alone)
 # =============================================================================
-FAST_MODE    = True
+FAST_MODE    = False
 EPOCHS       = 2 if FAST_MODE else 5
 BATCH_SIZE   = 32
 BACKBONE_LR  = 1e-5    # fine-tune DistilBERT backbone
@@ -34,6 +34,19 @@ except (ImportError, AssertionError):
     raise RuntimeError(
         "Restart runtime now (Runtime → Restart session), then re-run from Cell 1"
     )
+
+import os
+# MLflow >=3.0 blocks the plain filesystem backend ("file://...mlruns") by default —
+# this project standardized on file-store URIs (Section 7+), so opt back in explicitly.
+# Must be set BEFORE mlflow resolves its tracking store (set_experiment/start_run).
+os.environ.setdefault("MLFLOW_ALLOW_FILE_STORE", "true")
+
+try:
+    import mlflow  # noqa: F401  (Colab base image does not ship mlflow)
+except ImportError:
+    import subprocess, sys
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "mlflow"])
+    import mlflow  # noqa: F401  (no torch/CUDA state involved — safe to import inline, no restart)
 
 # =============================================================================
 # Cell 3 — PROJECT_ROOT detection (searches for config.py — robust to any Drive path)
