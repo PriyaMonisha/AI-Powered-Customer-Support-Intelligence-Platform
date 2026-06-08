@@ -1,0 +1,46 @@
+{
+  "best_val_f1_macro": 0.182312,
+  "best_val_epoch": 4,
+  "test_f1_macro": 0.195406,
+  "test_f1_weighted": 0.195994,
+  "test_accuracy": 0.204841,
+  "epochs_trained": 5,
+  "fast_mode": false,
+  "per_class_f1": {
+    "Billing inquiry": 0.242875,
+    "Cancellation request": 0.199181,
+    "Product inquiry": 0.097448,
+    "Refund request": 0.206215,
+    "Technical issue": 0.231312
+  },
+  "history": {
+    "train_loss": [
+      1.612323,
+      1.610154,
+      1.604658,
+      1.589625,
+      1.571735
+    ],
+    "val_loss": [
+      1.610242,
+      1.610365,
+      1.616122,
+      1.621994,
+      1.628521
+    ],
+    "val_f1": [
+      0.120477,
+      0.141154,
+      0.132542,
+      0.182312,
+      0.182181
+    ],
+    "val_acc": [
+      0.205431,
+      0.190083,
+      0.216057,
+      0.187721,
+      0.18536
+    ]
+  }
+}

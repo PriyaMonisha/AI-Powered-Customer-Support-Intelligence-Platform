@@ -118,7 +118,9 @@ from config import (
 )
 MAX_LENGTH = DISTILBERT_MAX_LENGTH   # single source of truth — no hardcoded 128
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+# force=True: Colab/transformers pre-attach root handlers, making basicConfig a no-op
+# without it — INFO logs (epoch progress, test eval) get silently swallowed
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", force=True)
 logger = logging.getLogger(__name__)
 
 # Persist MLflow runs to PROJECT_ROOT/mlruns (Drive-backed) — survives Colab disconnects
