@@ -1,0 +1,41 @@
+{
+  "fast_mode": true,
+  "dag_count": 4,
+  "task_counts": {
+    "csip_etl": 5,
+    "csip_drift_monitor": 6,
+    "csip_retrain": 10,
+    "csip_model_report": 5
+  },
+  "validation_results": {
+    "dag1_clean_pipeline": "pass",
+    "dag1_raw_rows": 29807,
+    "dag1_cleaned_rows": 8469,
+    "dag2_check_drift": {
+      "max_psi": 0.031134,
+      "n_drifted": 0,
+      "drift_detected": false
+    },
+    "dag3_champion_metrics": {
+      "type_f1": 0.199744,
+      "priority_f1": 0.262538,
+      "mean_champion_f1": 0.23114099999999999
+    },
+    "dag3_branch_simulation": {
+      "promote_case_result": "promote_models",
+      "skip_case_result": "skip_retrain",
+      "alert_case_result": "alert_regression",
+      "boundary_test": "promote_models"
+    },
+    "dag3_baseline_regen": {
+      "n_features_before": 17,
+      "n_features_after": 17,
+      "n_train": 5928,
+      "status": "pass"
+    },
+    "dag4_mlflow_runs_found": 41,
+    "dag4_clf_leaderboard_entries": 35,
+    "dag4_reg_leaderboard_entries": 6
+  },
+  "mlflow_run_id": "da20bba0cb5c4ea4bb8556a392678e4f"
+}
