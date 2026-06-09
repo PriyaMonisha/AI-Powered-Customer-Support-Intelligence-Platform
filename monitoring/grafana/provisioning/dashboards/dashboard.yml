@@ -1,0 +1,16 @@
+# filename: monitoring/grafana/provisioning/dashboards/dashboard.yml
+# purpose:  Grafana dashboard provider — auto-loads csip_overview.json from this folder
+# version:  1.0
+
+apiVersion: 1
+
+providers:
+  - name: csip-dashboards
+    orgId: 1
+    folder: ""
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

@@ -1,0 +1,77 @@
+{
+  "section": "12",
+  "fast_mode": true,
+  "generated_at": "2026-06-08T23:16:18.286877",
+  "drift_psi_threshold": 0.1,
+  "synthetic_shift": {
+    "feature": "Customer Age",
+    "magnitude_std_units": 2.0,
+    "training_std": 15.197666,
+    "absolute_shift": 30.395332
+  },
+  "scenarios": {
+    "train_vs_test": {
+      "evidently_n_drifted_columns": 0,
+      "evidently_share_drifted": 0.0,
+      "custom_psi": {
+        "feature_scores": {
+          "response_hour_of_day": 0.087919,
+          "word_count": 0.031134,
+          "sentiment_compound": 0.014543,
+          "Product Purchased_Technical issue": 0.014074,
+          "Product Purchased_Product inquiry": 0.010364,
+          "Product Purchased_Cancellation request": 0.006991,
+          "days_since_purchase": 0.004391,
+          "Product Purchased_Billing inquiry": 0.002099,
+          "Product Purchased_Refund request": 0.001616,
+          "char_count": 0.001592,
+          "Customer Age": 0.001011,
+          "Ticket Channel_enc": 0.000958,
+          "Customer Gender_enc": 0.000921,
+          "has_first_response": 0.000633,
+          "is_resolved": 0.000164,
+          "csat_available": 0.000164,
+          "subject_word_count": 0.0
+        },
+        "max_psi": 0.087919,
+        "n_drifted": 0,
+        "drift_detected": false,
+        "checked_at": "2026-06-08T17:44:48.008404+00:00"
+      }
+    },
+    "train_vs_shifted_test": {
+      "evidently_n_drifted_columns": 1,
+      "evidently_share_drifted": 0.058824,
+      "custom_psi": {
+        "feature_scores": {
+          "Customer Age": 6.908427,
+          "response_hour_of_day": 0.087919,
+          "word_count": 0.031134,
+          "sentiment_compound": 0.014543,
+          "Product Purchased_Technical issue": 0.014074,
+          "Product Purchased_Product inquiry": 0.010364,
+          "Product Purchased_Cancellation request": 0.006991,
+          "days_since_purchase": 0.004391,
+          "Product Purchased_Billing inquiry": 0.002099,
+          "Product Purchased_Refund request": 0.001616,
+          "char_count": 0.001592,
+          "Ticket Channel_enc": 0.000958,
+          "Customer Gender_enc": 0.000921,
+          "has_first_response": 0.000633,
+          "is_resolved": 0.000164,
+          "csat_available": 0.000164,
+          "subject_word_count": 0.0
+        },
+        "max_psi": 6.908427,
+        "n_drifted": 1,
+        "drift_detected": true,
+        "checked_at": "2026-06-08T17:44:48.033775+00:00"
+      }
+    }
+  },
+  "methods_agree": true,
+  "reports": {
+    "baseline_html": "artifacts\\reports\\drift_report_baseline.html",
+    "shifted_html": "artifacts\\reports\\drift_report_shifted.html"
+  }
+}

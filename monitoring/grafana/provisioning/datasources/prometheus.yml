@@ -1,0 +1,14 @@
+# filename: monitoring/grafana/provisioning/datasources/prometheus.yml
+# purpose:  Grafana datasource provisioning — points Grafana at the Prometheus container
+# version:  1.0
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    # "prometheus" is the Docker Compose service name (Section 14)
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false

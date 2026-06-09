@@ -1,0 +1,84 @@
+# filename: monitoring/configs/alert_rules.yml
+# purpose:  Prometheus-native alerting rules for the CSIP serving + drift stack
+# version:  1.0
+#
+# Mounted directly into the Prometheus container (rule_files in prometheus.yml) —
+# NOT a Grafana unified-alerting provisioning file (different schema entirely:
+# apiVersion/uid/condition/data). Prometheus + Alertmanager is the simpler,
+# single-engine, more-portable pairing for a Prometheus + Grafana stack.
+#
+# Zero-traffic guard: rate-based ratios (#1, #2) are guarded with
+# "and sum by (task) (rate(csip_predictions_total[5m])) > 0" so idle deployments
+# don't false-trigger on 0/0 = NaN. Level-based gauges (#3, #4) have no such failure
+# mode — there is nothing to divide by zero — so they deliberately omit the guard.
+
+groups:
+  - name: csip_alerts
+    rules:
+      - alert: HighPredictionErrorRate
+        expr: >
+          (sum by (task) (rate(csip_prediction_errors_total[5m]))
+           / sum by (task) (rate(csip_predictions_total[5m]))) > 0.05
+          and sum by (task) (rate(csip_predictions_total[5m])) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High prediction error rate for task {{ $labels.task }}"
+          description: >
+            Error ratio for task "{{ $labels.task }}" has exceeded 5% over the last
+            5 minutes (current value: {{ $value | printf "%.4f" }}). Check
+            csip_prediction_errors_total{task="{{ $labels.task }}"} by error_type.
+
+      - alert: HighPredictionLatencyP95
+        expr: >
+          histogram_quantile(0.95, sum by (le, task) (rate(csip_prediction_latency_seconds_bucket[5m]))) > 0.5
+          and sum by (task) (rate(csip_predictions_total[5m])) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "p95 latency for task {{ $labels.task }} exceeds 500ms"
+          description: >
+            p95 prediction latency for task "{{ $labels.task }}" is
+            {{ $value | printf "%.3f" }}s, above the documented < 500ms API target.
+
+      - alert: FeatureDriftDetected
+        expr: csip_drift_detected == 1
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Feature drift detected against the Section 6 training baseline"
+          description: >
+            csip_drift_detected == 1 — at least one tabular feature's PSI exceeded
+            DRIFT_PSI_THRESHOLD on the last /admin/drift-check run. Fires immediately
+            (for: 0m) since this gauge only changes on an explicit, infrequent check —
+            a sustain window would just delay the alert on a value that won't flap.
+            Inspect csip_feature_drift_psi by feature for the worst offenders.
+
+      - alert: ModelsNotLoaded
+        expr: csip_models_loaded == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CSIP API reports models not loaded"
+          description: >
+            csip_models_loaded == 0 for over 2 minutes — the serving layer is unable
+            to handle prediction requests. Check FastAPI startup/lifespan logs.
+
+      - alert: DriftCheckStale
+        expr: >
+          (time() - csip_drift_last_check_timestamp) > 86400
+          and csip_drift_last_check_timestamp > 0
+        for: 1m
+        labels:
+          severity: info
+        annotations:
+          summary: "Drift has not been checked in over 24 hours"
+          description: >
+            csip_drift_last_check_timestamp is more than 24h old. The "> 0" guard
+            excludes the -1 "never checked" startup sentinel so a freshly-booted API
+            doesn't immediately page anyone. Call POST /admin/drift-check (or wait for
+            the Section 13 Airflow schedule) to refresh it.

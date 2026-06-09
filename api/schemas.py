@@ -82,3 +82,11 @@ class ExplainPriorityResponse(APIBaseModel):
 class ReloadResponse(BaseModel):
     status: str
     reload_time_ms: float
+
+
+class DriftCheckResponse(APIBaseModel):
+    drift_detected: bool
+    max_psi: float
+    n_drifted: int
+    feature_scores: dict[str, float]
+    checked_at: str

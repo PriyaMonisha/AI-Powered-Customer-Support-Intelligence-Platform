@@ -46,7 +46,12 @@ PROMOTE_THRESHOLD    = 0.02   # new model F1 must exceed champion by ≥ 2%
 REGRESSION_THRESHOLD = 0.05   # alert if new model F1 is ≥ 5% WORSE than champion
 
 # Drift detection
-DRIFT_KS_THRESHOLD = 0.10   # KS statistic above this triggers retraining DAG
+# PSI (Population Stability Index) threshold — 0.10 is the standard "moderate drift"
+# cutoff. Named DRIFT_PSI_THRESHOLD (not _KS_) because the baseline only stores
+# percentile/frequency summaries, not raw reference rows — a true KS test needs
+# empirical CDFs, so drift is computed via PSI (see src/monitoring/drift.py).
+DRIFT_PSI_THRESHOLD = 0.10
+DRIFT_SUMMARY_PATH = ARTIFACTS_DIR / "metrics" / "section_12_metrics.json"
 
 # SLA breach thresholds (hours per priority level)
 SLA_CRITICAL_HOURS = 4

@@ -2,6 +2,7 @@
 # purpose:  FastAPI dependencies — API key auth, model access, and shared model loading
 # version:  1.0
 
+import json
 import secrets
 
 import joblib
@@ -10,6 +11,7 @@ from fastapi import Header, HTTPException, Request
 
 from config import (
     ADMIN_API_KEY,
+    FEATURES_DIR,
     LE_PRIORITY_PATH,
     LE_TYPE_PATH,
     LGBM_TYPE_PATH,
@@ -23,6 +25,7 @@ from config import (
 from src.features.tabular_features import TabularEncoder
 from src.models.advanced_classifier import AdvancedClassifier
 from src.models.advanced_regressor import AdvancedRegressor
+from src.monitoring.drift import load_baseline
 
 
 async def verify_api_key(x_api_key: str | None = Header(None, alias="X-API-Key")) -> str:
@@ -50,6 +53,9 @@ def _load_all_models() -> dict:
         if isinstance(preprocessor_obj, dict)
         else preprocessor_obj
     )
+    with open(FEATURES_DIR / "tabular_columns.json") as f:
+        drift_columns = json.load(f)
+
     return {
         "preprocessor": preprocessor,
         "tabular_encoder": TabularEncoder.load(TABULAR_ENCODER_PATH),
@@ -60,6 +66,11 @@ def _load_all_models() -> dict:
         "reg": reg,
         "keep_mask": np.load(REGRESSOR_KEEP_MASK_PATH),
         "shap_priority": joblib.load(SHAP_EXPLAINER_PRIORITY_PATH),
+        # Section 12 — drift monitoring: cached once at startup since the test split
+        # and baseline are static (no point re-reading a 1.3 MB .npy on every call)
+        "drift_current": np.load(FEATURES_DIR / "X_test_tabular.npy"),
+        "drift_columns": drift_columns,
+        "drift_baseline": load_baseline(),
     }
 
 

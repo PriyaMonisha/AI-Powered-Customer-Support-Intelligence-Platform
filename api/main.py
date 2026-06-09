@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from api.deps import _load_all_models, _verify_models
-from api.metrics import csip_models_loaded
+from api.metrics import csip_models_loaded, register_feature_gauges
 from api.routers import admin, classify, explain, health, monitoring, regress
 from config import API_TITLE, API_VERSION
 
@@ -29,6 +29,7 @@ async def lifespan(app: FastAPI):
     app.state.startup_ts = startup_ts
     app.state.last_reload_ts = 0.0
     csip_models_loaded.set(1)
+    register_feature_gauges(models["drift_columns"])
     log.info("CSIP API ready — %d model artifacts loaded", len(models))
 
     yield
