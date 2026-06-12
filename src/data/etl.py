@@ -84,7 +84,7 @@ def upsert_tickets(df: pd.DataFrame, engine, chunk_size: int = 500) -> int:
     total = 0
     for i in range(0, len(param_df), chunk_size):
         chunk = param_df.iloc[i : i + chunk_size]
-        records = chunk.where(pd.notna(chunk), other=None).to_dict("records")
+        records = chunk.astype(object).where(pd.notna(chunk), other=None).to_dict("records")
         with engine.begin() as conn:
             conn.execute(upsert, records)
         total += len(records)

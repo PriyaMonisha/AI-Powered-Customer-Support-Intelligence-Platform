@@ -1,0 +1,233 @@
+# filename: docker-compose.yml
+# purpose:  CSIP full-stack orchestration (Section 14) — 9 running services + 1 init.
+#           postgres, redis, mlflow, fastapi, prometheus, alertmanager, grafana,
+#           airflow-webserver, airflow-scheduler, airflow-init.
+
+networks:
+  csip-net:
+    driver: bridge
+
+volumes:
+  pgdata:
+  redis_data:
+  prometheus_data:
+  alertmanager_data:
+  grafana_data:
+  airflow_logs:
+
+x-airflow-common: &airflow-common
+  build:
+    context: ./docker/airflow
+  user: "${AIRFLOW_UID:-50000}:0"
+  networks: [csip-net]
+  environment: &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/airflow
+    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/project/airflow/dags
+    PYTHONPATH: /opt/airflow/project
+    DB_URL: postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/csip
+    REDIS_URL: redis://redis:6379
+    MLFLOW_URI: http://mlflow:5000
+    MLFLOW_TRACKING_URI: http://mlflow:5000
+    CSIP_ALERT_WEBHOOK: ${CSIP_ALERT_WEBHOOK:-}
+  volumes:
+    # Selective mounts — NOT the whole project root (excludes venv/, .git/, .env,
+    # mlruns/, notebooks/; Airflow talks to MLflow over HTTP, not the file store).
+    # Layout preserves _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+    # (DAG at /opt/airflow/project/airflow/dags/csip_etl.py -> 3 parents = /opt/airflow/project).
+    - ./airflow/dags:/opt/airflow/project/airflow/dags:ro
+    - ./src:/opt/airflow/project/src:ro
+    - ./config.py:/opt/airflow/project/config.py:ro
+    - ./models:/opt/airflow/project/models
+    - ./data:/opt/airflow/project/data
+    - ./artifacts:/opt/airflow/project/artifacts
+    - airflow_logs:/opt/airflow/logs
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    networks: [csip-net]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: csip
+      POSTGRES_MULTIPLE_DATABASES: airflow
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init-multi-db.sh:/docker-entrypoint-initdb.d/init-multi-db.sh:ro
+    ports:
+      - "5433:5432"  # host port 5433: a native PostgreSQL 18 Windows service already owns 5432
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d csip && psql -U ${POSTGRES_USER:-postgres} -d airflow -c 'SELECT 1' >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks: [csip-net]
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mlflow:
+    build:
+      context: ./docker/mlflow
+    restart: unless-stopped
+    networks: [csip-net]
+    volumes:
+      - ./mlruns:/mlflow/mlruns
+    ports:
+      - "5001:5000"
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks: [csip-net]
+    environment:
+      DB_URL: postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/csip
+      REDIS_URL: redis://redis:6379
+      MLFLOW_URI: http://mlflow:5000
+      ADMIN_API_KEY: ${ADMIN_API_KEY}
+    volumes:
+      - ./models:/app/models
+      - ./data/processed:/app/data/processed
+      - ./artifacts/drift:/app/artifacts/drift
+      - ./artifacts/reports:/app/artifacts/reports
+    ports:
+      - "8000:8000"
+    mem_limit: 3g
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - "import json,sys,urllib.request; r=urllib.request.urlopen('http://localhost:8000/health',timeout=3); d=json.load(r); sys.exit(0 if d.get('status')=='healthy' else 1)"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 180s
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    restart: unless-stopped
+    networks: [csip-net]
+    volumes:
+      - ./monitoring/configs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/configs/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    restart: unless-stopped
+    networks: [csip-net]
+    volumes:
+      - ./monitoring/configs/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    ports:
+      - "9093:9093"
+    mem_limit: 128m
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9093/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    restart: unless-stopped
+    networks: [csip-net]
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    mem_limit: 256m
+    depends_on:
+      prometheus:
+        condition: service_healthy
+
+  airflow-init:
+    <<: *airflow-common
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow db migrate
+        airflow users create \
+          --username "${_AIRFLOW_WWW_USER_USERNAME:-admin}" \
+          --password "${_AIRFLOW_WWW_USER_PASSWORD:-admin}" \
+          --firstname Admin --lastname User \
+          --role Admin --email admin@example.com || true
+    restart: "no"
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+    mem_limit: 1g
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    mem_limit: 2g
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s

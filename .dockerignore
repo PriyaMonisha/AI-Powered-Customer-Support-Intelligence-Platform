@@ -1,0 +1,36 @@
+# filename: .dockerignore
+# purpose:  Keep the FastAPI build context small. Large/regenerable artifacts and
+#           data directories are bind-mounted at runtime (see docker-compose.yml),
+#           never baked into the image.
+
+venv/
+.venv/
+.git/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Docs / prep files (gitignored anyway, but keep out of build context too)
+*.md
+*.pdf
+.claude/
+
+# Secrets — never bake into an image
+.env
+
+# Bind-mounted at runtime (see docker-compose.yml volumes)
+mlruns/
+models/
+data/
+artifacts/
+
+# Notebooks — terminal .py scripts + gitignored .ipynb, no purpose in the API image
+notebooks/
+
+# Other top-level apps with their own images / not needed by FastAPI
+dash_app/
+airflow/
+docker/
+tests/

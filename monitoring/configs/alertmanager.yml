@@ -1,0 +1,22 @@
+# filename: monitoring/configs/alertmanager.yml
+# purpose:  Alertmanager routing/receiver config for the 5 CSIP Prometheus alert
+#           rules (monitoring/configs/alert_rules.yml). No external integrations
+#           configured — alerts are visible in the Alertmanager UI (localhost:9093).
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: 'default'
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    - match: { severity: critical }
+      receiver: 'default'
+      repeat_interval: 1h
+
+receivers:
+  - name: 'default'
+    # No integrations — alerts visible in Alertmanager UI (localhost:9093),
+    # not forwarded externally. Uncomment webhook_configs to add Slack etc.

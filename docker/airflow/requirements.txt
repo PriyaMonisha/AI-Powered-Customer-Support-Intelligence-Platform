@@ -1,0 +1,37 @@
+# filename: docker/airflow/requirements.txt
+# purpose:  Extra Python packages for the CSIP Airflow image (LocalExecutor),
+#           installed WITH --constraint (see Dockerfile) on top of
+#           apache/airflow:2.9.3-python3.11.
+#
+# Airflow 2.9.x requires SQLAlchemy <2.0 (root requirements.txt pins 2.0.30) —
+# sqlalchemy is intentionally NOT listed here so Airflow's constrained 1.4.x wins.
+# src/data/etl.py only uses create_engine(url, pool_pre_ping=True) + text(),
+# which is compatible with SQLAlchemy 1.4.
+#
+# pandas/numpy/scikit-learn/scipy use ranges (not exact root-requirements pins) so
+# --constraint can resolve a version compatible with Airflow's Flask/alembic stack.
+# xgboost/lightgbm/optuna/pandera/redis/mlflow are not Airflow dependencies, so exact
+# pins are kept for reproducibility with the rest of the project.
+#
+# redis==5.0.7 (not root requirements.txt's 5.0.4): Airflow 2.9.3's constraints file
+# pins redis==5.0.7, and --constraint forbids an exact-pin conflict. 5.0.4->5.0.7 is
+# a patch bump within redis-py 5.x, compatible with src/features/feature_store.py.
+#
+# mlflow-skinny (not full mlflow): full mlflow==2.13.2 requires pyarrow<16, but
+# Airflow 2.9.3's constraints pin pyarrow==16.1.0 exactly -- ResolutionImpossible.
+# csip_model_report.py (the only DAG using mlflow) only calls set_tracking_uri(),
+# get_experiment_by_name(), search_runs() -- pure tracking-client API, fully covered
+# by mlflow-skinny (same package/version, same mlflow.tracking code, no
+# pyarrow/matplotlib/Flask server bundle).
+
+pandas>=2.1,<2.3
+numpy>=1.26,<2.0
+scipy>=1.11,<1.14
+scikit-learn>=1.4,<1.6
+xgboost==2.0.3
+lightgbm==4.3.0
+mlflow-skinny==2.13.2
+optuna==3.6.1
+pandera==0.20.3
+psycopg2-binary==2.9.9
+redis==5.0.7

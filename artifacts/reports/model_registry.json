@@ -9,8 +9,10 @@
   "ticket_priority": {
     "section": 6,
     "algo": "xgb",
-    "val_f1_macro": 0.262538,
+    "val_f1_macro": 0.27863,
     "vs_baseline": 0.020757,
-    "artifact": "models\\xgb_priority_classifier.pkl"
-  }
+    "artifact": "models\\xgb_priority_classifier.pkl",
+    "last_updated": "2026-06-12"
+  },
+  "last_report_run": "2026-05-31"
 }
