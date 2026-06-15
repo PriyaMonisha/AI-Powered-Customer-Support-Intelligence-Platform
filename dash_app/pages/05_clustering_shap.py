@@ -12,7 +12,7 @@ register_page(__name__, path="/clustering-shap", name="Clustering & Explainabili
 
 CLUSTERING_CHARTS = [
     ("clustering_elbow.png", "Elbow Method (inertia vs. K)"),
-    ("clustering_silhouette.png", "Silhouette Score by K — best K=2 (silhouette=0.1573)"),
+    ("clustering_silhouette.png", "Silhouette & Davies-Bouldin Index by K — best K=2 (silhouette=0.1573, DBI=2.1902)"),
     ("clustering_pca_scatter.png", "PCA Projection of Clusters (K=2)"),
     ("clustering_tsne.png", "t-SNE Projection of Clusters (stratified subsample)"),
 ]
@@ -24,6 +24,11 @@ SHAP_CHARTS = [
     ("shap_priority_waterfall_wrong.png", "Priority Classifier — Waterfall (mid-confidence wrong prediction)"),
     ("shap_regressor_bar.png", "Resolution Regressor — Mean |SHAP| Feature Importance (top: response_hour_of_day)"),
     ("shap_regressor_beeswarm.png", "Resolution Regressor — SHAP Beeswarm"),
+]
+
+ATTENTION_CHARTS = [
+    ("distilbert_attention_correct.png", "DistilBERT [CLS] Attention — correctly-classified example (token-level, by layer)"),
+    ("distilbert_attention_wrong.png", "DistilBERT [CLS] Attention — misclassified example (token-level, by layer)"),
 ]
 
 
@@ -50,6 +55,8 @@ def layout():
             _gallery(CLUSTERING_CHARTS),
             html.H5("SHAP Explainability (Section 8c)", className="mt-4"),
             _gallery(SHAP_CHARTS),
+            html.H5("DistilBERT Attention Visualization (Section 9b)", className="mt-4"),
+            _gallery(ATTENTION_CHARTS),
         ],
         fluid=True,
         className="py-3",

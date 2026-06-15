@@ -206,8 +206,9 @@ at the noise floor, which is itself a meaningful finding: see §6.)*
 | LightGBM | 7.11 | ≈ −0.01 to −0.05 |
 
 ### 5.8 Clustering, Explainability (Section 8b/8c) & BiLSTM (Section 8a — Skipped)
-- **K-Means segmentation:** swept K=2..6; best K=2 (silhouette score = 0.1573),
-  visualized via PCA and t-SNE
+- **K-Means segmentation:** swept K=2..6; best K=2 (silhouette score = 0.1573,
+  Davies-Bouldin index = 2.1902 — also the minimum across K=2..6, corroborating
+  the silhouette pick), visualized via PCA and t-SNE
 - **SHAP explainability** (TreeExplainer on the LGBM/XGB models):
   - Top driver of *priority* predictions: `days_since_purchase`
   - Top driver of *resolution-time* predictions: `response_hour_of_day`

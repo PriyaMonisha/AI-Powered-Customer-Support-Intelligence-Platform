@@ -56,7 +56,7 @@ surfaces this as a warning banner. This is a deliberate, documented decision, no
 | **Classical ML** | RF / XGBoost / LightGBM for Type + Priority + Resolution, tuned via Optuna (`FAST_MODE` smoke-test vs. `FULL_MODE`), `class_weight="balanced"` |
 | **Transformer Fine-Tuning** | DistilBERT fine-tuned on subject+description (Google Colab T4, 5 epochs) for Ticket Type |
 | **Explainability** | SHAP `TreeExplainer` for the Priority model — top-feature waterfalls and beeswarm plots |
-| **Clustering** | K-Means (K=2, silhouette=0.1573) + PCA + t-SNE customer segmentation |
+| **Clustering** | K-Means (K=2, silhouette=0.1573, Davies-Bouldin=2.1902) + PCA + t-SNE customer segmentation |
 | **Experiment Tracking** | MLflow — 47 logged runs, 3 registered models with Production/Challenger aliases |
 | **Serving** | FastAPI — 7 endpoints, `X-API-Key` auth (admin + read-scoped), `/admin/reload` hot-swap, Prometheus metrics |
 | **Monitoring** | Prometheus + Grafana + Alertmanager + Evidently/PSI drift detection, 5 alert rules |

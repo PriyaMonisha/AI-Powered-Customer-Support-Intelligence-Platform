@@ -36,7 +36,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import davies_bouldin_score, silhouette_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
@@ -107,7 +107,7 @@ def sweep_kmeans(
     random_state: int,
 ) -> dict[int, dict]:
     """
-    Sweep K-Means across k_range. Returns {k: {inertia, silhouette}}.
+    Sweep K-Means across k_range. Returns {k: {inertia, silhouette, davies_bouldin}}.
     Models are NOT stored in the dict to keep memory footprint small.
     Uses n_init='auto' which is 1 for k-means++ (sklearn 1.4+).
     """
@@ -116,8 +116,9 @@ def sweep_kmeans(
         km = KMeans(n_clusters=k, random_state=random_state, n_init="auto", init="k-means++")
         labels = km.fit_predict(X)
         sil = silhouette_score(X, labels)
-        results[k] = {"inertia": float(km.inertia_), "silhouette": float(sil)}
-        logger.info("K=%d  inertia=%.2f  silhouette=%.4f", k, km.inertia_, sil)
+        dbi = davies_bouldin_score(X, labels)
+        results[k] = {"inertia": float(km.inertia_), "silhouette": float(sil), "davies_bouldin": float(dbi)}
+        logger.info("K=%d  inertia=%.2f  silhouette=%.4f  davies_bouldin=%.4f", k, km.inertia_, sil, dbi)
     return results
 
 logger.info("=" * 60)
@@ -132,8 +133,9 @@ def select_best_k(sweep_results: dict[int, dict]) -> int:
     """Return K with highest silhouette score."""
     best_k = max(sweep_results, key=lambda k: sweep_results[k]["silhouette"])
     logger.info(
-        "Best K=%d  (silhouette=%.4f  inertia=%.2f)",
+        "Best K=%d  (silhouette=%.4f  inertia=%.2f  davies_bouldin=%.4f)",
         best_k, sweep_results[best_k]["silhouette"], sweep_results[best_k]["inertia"],
+        sweep_results[best_k]["davies_bouldin"],
     )
     return best_k
 
@@ -189,12 +191,20 @@ def plot_silhouette_scores(
 ) -> Path:
     ks  = list(sweep_results.keys())
     sil = [sweep_results[k]["silhouette"] for k in ks]
+    dbi = [sweep_results[k]["davies_bouldin"] for k in ks]
     colors = ["#e15759" if k == best_k else "#4e79a7" for k in ks]
     fig, ax = plt.subplots(figsize=(7, 4))
     bars = ax.bar(ks, sil, color=colors, edgecolor="white")
     ax.bar_label(bars, fmt="%.4f", padding=2, fontsize=8)
     ax.set_xlabel("Number of Clusters (K)"); ax.set_ylabel("Silhouette Score")
-    ax.set_title("Silhouette Score by K  (higher = better)"); ax.set_xticks(ks)
+    ax.set_xticks(ks)
+
+    ax2 = ax.twinx()
+    ax2.plot(ks, dbi, marker="o", color="#59a14f", linewidth=2, label="Davies-Bouldin Index")
+    ax2.set_ylabel("Davies-Bouldin Index")
+    ax2.legend(loc="upper right", fontsize=8)
+
+    ax.set_title("Silhouette (bars, higher=better) & Davies-Bouldin Index (line, lower=better) by K")
     plt.tight_layout()
     fig.savefig(save_path, dpi=100, bbox_inches="tight"); plt.close(fig)
     return save_path
@@ -324,10 +334,12 @@ with mlflow.start_run(run_name="kmeans_sweep"):
         "n_samples":    str(X_train_raw.shape[0]),
     })
     for k in K_RANGE:
-        mlflow.log_metric(f"silhouette_k{k}", round(sweep_results[k]["silhouette"], 6))
-        mlflow.log_metric(f"inertia_k{k}",    round(sweep_results[k]["inertia"],    6))
-    mlflow.log_metric("best_silhouette", round(sweep_results[best_k]["silhouette"], 6))
-    mlflow.log_metric("best_inertia",    round(sweep_results[best_k]["inertia"],    6))
+        mlflow.log_metric(f"silhouette_k{k}",     round(sweep_results[k]["silhouette"],     6))
+        mlflow.log_metric(f"inertia_k{k}",        round(sweep_results[k]["inertia"],        6))
+        mlflow.log_metric(f"davies_bouldin_k{k}", round(sweep_results[k]["davies_bouldin"], 6))
+    mlflow.log_metric("best_silhouette",     round(sweep_results[best_k]["silhouette"],     6))
+    mlflow.log_metric("best_inertia",        round(sweep_results[best_k]["inertia"],        6))
+    mlflow.log_metric("best_davies_bouldin", round(sweep_results[best_k]["davies_bouldin"], 6))
     for chart_path in [elbow_path, sil_path, pca_path, tsne_path]:
         mlflow.log_artifact(str(chart_path))
     mlflow.sklearn.log_model(final_model, "kmeans_model")
@@ -357,14 +369,16 @@ section_08b_metrics = {
     "generated_at":      datetime.datetime.now().isoformat(),
     "k_range":           list(K_RANGE),
     "best_k":            best_k,
-    "best_silhouette":   round(sweep_results[best_k]["silhouette"], 6),
-    "best_inertia":      round(sweep_results[best_k]["inertia"],    6),
+    "best_silhouette":     round(sweep_results[best_k]["silhouette"], 6),
+    "best_inertia":        round(sweep_results[best_k]["inertia"],    6),
+    "best_davies_bouldin": round(sweep_results[best_k]["davies_bouldin"], 6),
     "cluster_sizes":     {str(k): int((cluster_labels == k).sum()) for k in range(best_k)},
     "pca_explained_var": [round(float(v), 6) for v in explained_var],
     "all_k_results": {
         str(k): {
-            "silhouette": round(sweep_results[k]["silhouette"], 6),
-            "inertia":    round(sweep_results[k]["inertia"],    6),
+            "silhouette":     round(sweep_results[k]["silhouette"],     6),
+            "inertia":        round(sweep_results[k]["inertia"],        6),
+            "davies_bouldin": round(sweep_results[k]["davies_bouldin"], 6),
         }
         for k in K_RANGE
     },
@@ -386,7 +400,8 @@ logger.info("Saved metrics → %s", metrics_path)
 # ---------------------------------------------------------------------------
 logger.info("=" * 60)
 logger.info("SECTION 8b COMPLETE — K-Means Clustering")
-logger.info("Best K=%d  silhouette=%.4f", best_k, sweep_results[best_k]["silhouette"])
+logger.info("Best K=%d  silhouette=%.4f  davies_bouldin=%.4f",
+            best_k, sweep_results[best_k]["silhouette"], sweep_results[best_k]["davies_bouldin"])
 logger.info("Models: %s | %s", KMEANS_MODEL_PATH.name, KMEANS_SCALER_PATH.name)
 logger.info("Charts: %s", " | ".join(p.name for p in [elbow_path, sil_path, pca_path, tsne_path]))
 logger.info("MLflow experiment: csip-clustering (1 run)")
