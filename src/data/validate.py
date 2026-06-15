@@ -18,7 +18,7 @@ TICKET_TYPES    = {
     "Product inquiry",
     "Refund request",
     "Cancellation request",
-}  # 5 classes confirmed from initial_analysis.ipynb — NOT the 4 in GUVI spec
+}  # 5 classes confirmed from initial_analysis.ipynb — NOT the 4 originally specified
 TICKET_PRIORITIES = {"Critical", "High", "Medium", "Low"}
 TICKET_CHANNELS = {"Email", "Chat", "Phone", "Social media"}
 TICKET_STATUSES = {"Open", "Pending Customer Response", "Closed"}
