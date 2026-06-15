@@ -28,6 +28,7 @@ mlruns/
 /artifacts/charts/
 /artifacts/drift/
 /artifacts/tmp/
+/artifacts/reports/drift_report_*.html
 *.pkl
 *.pt
 *.h5

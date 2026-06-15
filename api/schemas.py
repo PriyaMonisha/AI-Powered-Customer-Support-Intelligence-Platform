@@ -41,6 +41,8 @@ class PredictTypeResponse(APIBaseModel):
     probabilities: dict[str, float]
     auto_route: bool
     flag_for_review: bool
+    model_status: str
+    reliability_note: str
     model_name: str
     processing_time_ms: float
 

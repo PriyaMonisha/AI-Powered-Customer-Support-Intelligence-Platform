@@ -178,7 +178,12 @@ def _render_type(data: dict | None, error: str | None):
     ]
     note = load_confidence_thresholds().get("ticket_type", {}).get("note")
 
-    children = [
+    children = []
+    reliability_note = data.get("reliability_note")
+    if data.get("model_status") == "below_quality_bar" and reliability_note:
+        children.append(dbc.Alert(reliability_note, color="warning", className="mb-2"))
+
+    children += [
         html.P(f"Predicted: {data['predicted_label']} (confidence {data['confidence']:.1%})"),
         html.Div(badges, className="mb-2"),
         _probability_chart(data["probabilities"], "Ticket Type Probabilities"),

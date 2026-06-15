@@ -42,6 +42,18 @@ RANDOM_STATE = 42
 AUTO_ROUTE      = 0.85   # confidence ≥ this → auto-route ticket to correct queue
 FLAG_THRESHOLD  = 0.60   # [0.60, 0.85) → flag for human review; < 0.60 → human triage
 
+# Ticket Type model quality flag (audit hardening, 2026-06-15). LGBM ticket-type
+# classifier scores val F1-macro=0.1997 vs the 5-class random-guess baseline of
+# 0.20 (Section 6) — confirmed by DistilBERT (test F1=0.1954, Section 9). The
+# auto_route/flag_for_review fields on /predict/type remain for API compatibility,
+# but this status is surfaced so callers know not to rely on them for automation.
+TYPE_MODEL_STATUS = "below_quality_bar"
+TYPE_MODEL_RELIABILITY_NOTE = (
+    "Ticket Type classifier (val F1-macro=0.1997) is at the 5-class random-guess "
+    "baseline (0.20). auto_route/flag_for_review are not validated for automated "
+    "routing -- route to human triage."
+)
+
 # Retraining guards (used in model_retraining_dag)
 PROMOTE_THRESHOLD    = 0.02   # new model F1 must exceed champion by ≥ 2%
 REGRESSION_THRESHOLD = 0.05   # alert if new model F1 is ≥ 5% WORSE than champion

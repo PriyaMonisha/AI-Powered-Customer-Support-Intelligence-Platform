@@ -20,17 +20,24 @@ log = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     startup_ts = time.time()
-    loop = asyncio.get_running_loop()
-    models = await loop.run_in_executor(None, _load_all_models)
-    await loop.run_in_executor(None, _verify_models, models)
-
-    app.state.models = models
-    app.state.ready = True
+    app.state.models = {}
+    app.state.ready = False
     app.state.startup_ts = startup_ts
     app.state.last_reload_ts = 0.0
-    csip_models_loaded.set(1)
-    register_feature_gauges(models["drift_columns"])
-    log.info("CSIP API ready — %d model artifacts loaded", len(models))
+    csip_models_loaded.set(0)
+
+    loop = asyncio.get_running_loop()
+    try:
+        models = await loop.run_in_executor(None, _load_all_models)
+        await loop.run_in_executor(None, _verify_models, models)
+    except Exception:
+        log.exception("CSIP API startup failed — model loading/verification raised")
+    else:
+        app.state.models = models
+        app.state.ready = True
+        csip_models_loaded.set(1)
+        register_feature_gauges(models["drift_columns"])
+        log.info("CSIP API ready — %d model artifacts loaded", len(models))
 
     yield
 

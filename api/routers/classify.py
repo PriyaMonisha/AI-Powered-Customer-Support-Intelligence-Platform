@@ -16,7 +16,12 @@ from api.metrics import (
     csip_predictions_total,
 )
 from api.schemas import PredictPriorityResponse, PredictTypeResponse, TicketRequest
-from config import AUTO_ROUTE, FLAG_THRESHOLD
+from config import (
+    AUTO_ROUTE,
+    FLAG_THRESHOLD,
+    TYPE_MODEL_RELIABILITY_NOTE,
+    TYPE_MODEL_STATUS,
+)
 from src.features.inference import build_tabular_features
 
 log = logging.getLogger(__name__)
@@ -57,6 +62,8 @@ async def predict_type(
         probabilities={cls: round(float(p), 4) for cls, p in zip(type_classes, proba)},
         auto_route=(confidence >= AUTO_ROUTE),
         flag_for_review=(FLAG_THRESHOLD <= confidence < AUTO_ROUTE),
+        model_status=TYPE_MODEL_STATUS,
+        reliability_note=TYPE_MODEL_RELIABILITY_NOTE,
         model_name="lgbm_type_classifier",
         processing_time_ms=round(elapsed, 2),
     )
