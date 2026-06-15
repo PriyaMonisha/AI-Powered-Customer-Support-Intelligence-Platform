@@ -7,7 +7,7 @@ import time
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from api.deps import get_models, verify_api_key
+from api.deps import get_models, verify_read_key
 from api.metrics import (
     csip_prediction_errors_total,
     csip_prediction_latency,
@@ -24,7 +24,7 @@ router = APIRouter(prefix="/predict")
 async def predict_resolution(
     ticket: TicketRequest,
     models: dict = Depends(get_models),
-    _: str = Depends(verify_api_key),
+    _: str = Depends(verify_read_key),
 ):
     t0 = time.perf_counter()
     try:

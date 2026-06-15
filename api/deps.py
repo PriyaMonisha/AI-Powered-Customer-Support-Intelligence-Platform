@@ -11,6 +11,7 @@ from fastapi import Header, HTTPException, Request
 
 from config import (
     ADMIN_API_KEY,
+    CSIP_API_KEY,
     FEATURES_DIR,
     LE_PRIORITY_PATH,
     LE_TYPE_PATH,
@@ -34,6 +35,20 @@ async def verify_api_key(x_api_key: str | None = Header(None, alias="X-API-Key")
     if not x_api_key or not secrets.compare_digest(x_api_key, ADMIN_API_KEY):
         raise HTTPException(403, "Invalid API key")
     return x_api_key
+
+
+async def verify_read_key(x_api_key: str | None = Header(None, alias="X-API-Key")) -> str:
+    """Read-only auth for /predict and /explain — accepts CSIP_API_KEY or ADMIN_API_KEY
+    (admin is a superset). Used by the Dash app, which only ever holds CSIP_API_KEY."""
+    if not CSIP_API_KEY and not ADMIN_API_KEY:
+        raise HTTPException(503, "API key not configured on server")
+    if not x_api_key:
+        raise HTTPException(403, "Invalid API key")
+    if CSIP_API_KEY and secrets.compare_digest(x_api_key, CSIP_API_KEY):
+        return x_api_key
+    if ADMIN_API_KEY and secrets.compare_digest(x_api_key, ADMIN_API_KEY):
+        return x_api_key
+    raise HTTPException(403, "Invalid API key")
 
 
 def get_models(request: Request) -> dict:

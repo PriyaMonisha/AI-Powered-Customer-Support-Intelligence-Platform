@@ -31,6 +31,7 @@ MLFLOW_TRACKING_URI = os.getenv("MLFLOW_URI",   "http://localhost:5001")
 HF_HUB_TOKEN        = os.getenv("HF_HUB_TOKEN", "")
 HF_USERNAME         = os.getenv("HF_USERNAME",  "")   # used as: f"{HF_USERNAME}/csip-distilbert"
 ADMIN_API_KEY       = os.getenv("ADMIN_API_KEY", "")
+CSIP_API_KEY        = os.getenv("CSIP_API_KEY", "")
 
 # ---------------------------------------------------------------------------
 # ML constants
