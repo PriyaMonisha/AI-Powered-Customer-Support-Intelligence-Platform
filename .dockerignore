@@ -1,7 +1,7 @@
 # filename: .dockerignore
-# purpose:  Keep the FastAPI build context small. Large/regenerable artifacts and
-#           data directories are bind-mounted at runtime (see docker-compose.yml),
-#           never baked into the image.
+# purpose:  Keep the build context small for the FastAPI and Dash images (both use
+#           context: .). Large/regenerable artifacts and data directories are
+#           bind-mounted at runtime (see docker-compose.yml), never baked into images.
 
 venv/
 .venv/
@@ -26,11 +26,9 @@ models/
 data/
 artifacts/
 
-# Notebooks — terminal .py scripts + gitignored .ipynb, no purpose in the API image
+# Notebooks — terminal .py scripts + gitignored .ipynb, no purpose in either image
 notebooks/
 
-# Other top-level apps with their own images / not needed by FastAPI
-dash_app/
+# Other top-level apps with their own images / not needed by FastAPI or Dash
 airflow/
-docker/
 tests/

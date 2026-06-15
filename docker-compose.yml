@@ -1,6 +1,6 @@
 # filename: docker-compose.yml
-# purpose:  CSIP full-stack orchestration (Section 14) — 9 running services + 1 init.
-#           postgres, redis, mlflow, fastapi, prometheus, alertmanager, grafana,
+# purpose:  CSIP full-stack orchestration (Sections 14-15) — 10 running services + 1 init.
+#           postgres, redis, mlflow, fastapi, dash, prometheus, alertmanager, grafana,
 #           airflow-webserver, airflow-scheduler, airflow-init.
 
 networks:
@@ -115,6 +115,7 @@ services:
       REDIS_URL: redis://redis:6379
       MLFLOW_URI: http://mlflow:5000
       ADMIN_API_KEY: ${ADMIN_API_KEY}
+      CSIP_API_KEY: ${CSIP_API_KEY}
     volumes:
       - ./models:/app/models
       - ./data/processed:/app/data/processed
@@ -133,6 +134,28 @@ services:
       timeout: 10s
       retries: 3
       start_period: 180s
+
+  dash:
+    build:
+      context: .
+      dockerfile: docker/dash/Dockerfile
+    restart: unless-stopped
+    networks: [csip-net]
+    environment:
+      CSIP_API_KEY: ${CSIP_API_KEY}
+      FASTAPI_URL: http://fastapi:8000
+      MLFLOW_URI: http://mlflow:5000
+      PROMETHEUS_URL: http://prometheus:9090
+    volumes:
+      - ./artifacts:/app/artifacts:ro
+      - ./data/processed:/app/data/processed:ro
+      - ./models:/app/models:ro
+    ports:
+      - "8050:8050"
+    mem_limit: 512m
+    depends_on:
+      fastapi:
+        condition: service_started
 
   prometheus:
     image: prom/prometheus:v2.53.0

@@ -1,0 +1,65 @@
+# Customer Support Intelligence Platform — requirements-ci.txt
+# CI-only subset of requirements.txt — trims torch/transformers/tokenizers/
+# huggingface-hub/datasets/tenacity (only used by Colab-only src/models/bilstm.py
+# and Section 9 DistilBERT training, neither imported by tests/) and spacy (its
+# en_core_web_sm model is a separate download step, not used by tests/).
+# Keep in sync with requirements.txt for all other lines.
+
+# ── Data & ML ───────────────────────────────────────────────────────────────
+pandas==2.2.2
+numpy==1.26.4
+scikit-learn==1.5.2
+scipy==1.13.1
+
+# ── Gradient Boosting ────────────────────────────────────────────────────────
+xgboost==2.0.3
+lightgbm==4.3.0
+
+# ── NLP & Text ───────────────────────────────────────────────────────────────
+nltk==3.8.1
+vaderSentiment==3.3.2
+wordcloud==1.9.3
+
+# ── Experiment Tracking ──────────────────────────────────────────────────────
+mlflow==2.13.2
+optuna==3.6.1
+
+# ── Explainability ───────────────────────────────────────────────────────────
+shap==0.45.1
+
+# ── Feature Store (custom Redis) ─────────────────────────────────────────────
+redis==5.0.4
+
+# ── Data Validation ──────────────────────────────────────────────────────────
+pandera==0.20.3               # NOT Great Expectations (Windows MAX_PATH issue)
+sqlalchemy==2.0.30
+psycopg2-binary==2.9.9
+
+# ── Monitoring & Drift ───────────────────────────────────────────────────────
+evidently==0.4.30             # PINNED — breaking API change between v0.2 and v0.4
+prometheus-client==0.20.0
+
+# ── API ──────────────────────────────────────────────────────────────────────
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+pydantic==2.7.1
+pydantic-settings==2.3.1
+python-multipart==0.0.9
+
+# ── Dashboard ────────────────────────────────────────────────────────────────
+dash==2.17.1
+dash-bootstrap-components==1.6.0
+plotly==5.22.0
+
+# ── Visualization (static charts — NOT Plotly write_image/Kaleido) ───────────
+matplotlib==3.10.9
+seaborn==0.13.2
+
+# ── Dev & Testing ────────────────────────────────────────────────────────────
+pytest==8.2.2
+pytest-cov==5.0.0
+pytest-asyncio==0.23.7
+httpx==0.27.0                 # for FastAPI TestClient
+black==24.4.2
+flake8==7.0.0
+python-dotenv==1.0.1

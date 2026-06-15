@@ -172,16 +172,58 @@ def test_load_baseline_malformed_json_raises_with_hint(tmp_path):
         load_baseline(path=bad_file)
 
 
-def test_load_baseline_loads_real_artifact():
-    baseline = load_baseline()
+@pytest.fixture
+def real_shaped_baseline(tmp_path):
+    """Writes a 17-feature training_baseline.json mirroring the actual Section 6
+    artifact's shape (2 ordinal-encoded categoricals w/ value_frequencies, 5
+    target-encoded Product Purchased_<class> columns, 10 numeric-passthrough
+    columns) so load_baseline()/check_drift() can be exercised against a
+    realistically-shaped artifact without the gitignored real file."""
+    categorical_features = ["Ticket Channel_enc", "Customer Gender_enc"]
+    target_enc_features = [
+        f"Product Purchased_{c}"
+        for c in ["Billing inquiry", "Cancellation request", "Product inquiry", "Refund request", "Technical issue"]
+    ]
+    numeric_features = [
+        "Customer Age", "days_since_purchase", "response_hour_of_day", "is_resolved",
+        "has_first_response", "csat_available", "char_count", "word_count",
+        "subject_word_count", "sentiment_compound",
+    ]
+    feature_names = categorical_features + target_enc_features + numeric_features
+
+    stats = {}
+    for f in categorical_features:
+        stats[f] = {
+            "mean": 1.0, "std": 0.8, "min": 0.0, "max": 3.0,
+            "p25": 0.0, "p50": 1.0, "p75": 2.0,
+            "value_frequencies": {"0.0": 0.4, "1.0": 0.35, "2.0": 0.2, "3.0": 0.05},
+        }
+    for f in target_enc_features:
+        stats[f] = {"mean": 0.2, "std": 0.1, "min": 0.0, "p25": 0.1, "p50": 0.2, "p75": 0.3, "max": 0.5}
+    for f in numeric_features:
+        stats[f] = {"mean": 50.0, "std": 28.0, "min": 0.0, "p25": 25.0, "p50": 50.0, "p75": 75.0, "max": 100.0}
+
+    baseline = {
+        "generated_at": "2026-01-01T00:00:00+00:00",
+        "n_train": 5928,
+        "feature_names": feature_names,
+        "stats": stats,
+    }
+
+    path = tmp_path / "training_baseline.json"
+    path.write_text(json.dumps(baseline))
+    return path
+
+
+def test_load_baseline_loads_from_fixture_path(real_shaped_baseline):
+    baseline = load_baseline(path=real_shaped_baseline)
     assert "stats" in baseline
     assert "feature_names" in baseline
     assert len(baseline["stats"]) == len(baseline["feature_names"])
 
 
-def test_load_baseline_real_artifact_round_trips_with_check_drift():
-    """Sanity check against the actual Section 6 artifact + a synthetic current sample."""
-    baseline = load_baseline()
+def test_load_baseline_fixture_round_trips_with_check_drift(real_shaped_baseline):
+    baseline = load_baseline(path=real_shaped_baseline)
     feature_names = baseline["feature_names"]
     rng = np.random.default_rng(0)
     df = pd.DataFrame(rng.uniform(0, 1, size=(200, len(feature_names))), columns=feature_names)
