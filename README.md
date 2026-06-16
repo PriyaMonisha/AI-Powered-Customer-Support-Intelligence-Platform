@@ -3,6 +3,7 @@
 > **8,469 support tickets · 3 ML tasks · DistilBERT + classical ML · Full MLOps stack**
 
 [![CI](https://github.com/PriyaMonisha/AI-Powered-Customer-Support-Intelligence-Platform/actions/workflows/ci.yml/badge.svg)](https://github.com/PriyaMonisha/AI-Powered-Customer-Support-Intelligence-Platform/actions/workflows/ci.yml)
+[![Live API](https://img.shields.io/badge/Live%20API-Render-46E3B7?style=flat&logo=render&logoColor=white)](https://ai-powered-customer-support-intelligence.onrender.com/health)
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat&logo=python&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.3.0-EE4C2C?style=flat&logo=pytorch&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?style=flat&logo=fastapi&logoColor=white)
@@ -10,6 +11,9 @@
 ![MLflow](https://img.shields.io/badge/MLflow-2.13-0194E2?style=flat&logo=mlflow&logoColor=white)
 ![Airflow](https://img.shields.io/badge/Airflow-2.9-017CEE?style=flat&logo=apacheairflow&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat&logo=docker&logoColor=white)
+
+**Live API:** https://ai-powered-customer-support-intelligence.onrender.com
+*(Free tier — first request after inactivity takes ~50s to cold-start)*
 
 An end-to-end ML system that automates **ticket type classification**, **priority prediction**,
 and **resolution-time estimation** for SaaS/e-commerce customer support operations. Covers the
@@ -219,14 +223,21 @@ with `FAST_MODE = True` in `config.py` for a fast smoke-test, or `False` for the
 ## API Endpoints
 
 ```bash
+# Live API base URL
+BASE=https://ai-powered-customer-support-intelligence.onrender.com
+# Local Docker Compose base URL
+# BASE=http://localhost:8000
+
 # Ticket type classification (LGBM) — note model_status/reliability_note in the response
-curl -X POST http://localhost:8000/predict/type \
+curl -X POST $BASE/predict/type \
   -H "X-API-Key: $CSIP_API_KEY" -H "Content-Type: application/json" \
-  -d '{"ticket_subject": "Order issue", "ticket_description": "My order arrived damaged"}'
+  -d '{"ticket_subject": "Order issue", "ticket_description": "My order arrived damaged",
+       "customer_age": 30, "customer_gender": "Male", "product_purchased": "GoPro Hero",
+       "ticket_channel": "Email", "response_hour_of_day": -1}'
 
 # Priority classification (XGB) + SHAP explanation
-curl -X POST http://localhost:8000/predict/priority -H "X-API-Key: $CSIP_API_KEY" ...
-curl -X POST http://localhost:8000/explain/priority -H "X-API-Key: $CSIP_API_KEY" ...
+curl -X POST $BASE/predict/priority -H "X-API-Key: $CSIP_API_KEY" ...
+curl -X POST $BASE/explain/priority -H "X-API-Key: $CSIP_API_KEY" ...
 ```
 
 | Method | Endpoint | Auth | Description |
@@ -241,8 +252,9 @@ curl -X POST http://localhost:8000/explain/priority -H "X-API-Key: $CSIP_API_KEY
 | POST | `/admin/drift-check` | `ADMIN_API_KEY` | On-demand PSI drift check vs. training baseline |
 
 `CSIP_API_KEY` is a read-scoped key (accepted alongside the superset `ADMIN_API_KEY`) used by
-the Dash app, so the dashboard container never holds admin credentials. API docs at
-**http://localhost:8000/docs**.
+the Dash app, so the dashboard container never holds admin credentials. Swagger UI:
+**https://ai-powered-customer-support-intelligence.onrender.com/docs** (live) or
+**http://localhost:8000/docs** (local).
 
 ---
 
