@@ -1,0 +1,15 @@
+[
+  "Ticket Channel_enc",
+  "Customer Gender_enc",
+  "Product Purchased_Billing inquiry",
+  "Product Purchased_Cancellation request",
+  "Product Purchased_Product inquiry",
+  "Product Purchased_Refund request",
+  "Product Purchased_Technical issue",
+  "Customer Age",
+  "days_since_purchase",
+  "response_hour_of_day",
+  "char_count",
+  "word_count",
+  "sentiment_compound"
+]

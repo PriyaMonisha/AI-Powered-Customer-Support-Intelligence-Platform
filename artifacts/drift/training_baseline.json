@@ -1,0 +1,231 @@
+{
+  "generated_at": "2026-06-09T08:57:50.583514+00:00",
+  "n_train": 5928,
+  "feature_names": [
+    "Ticket Channel_enc",
+    "Customer Gender_enc",
+    "Product Purchased_Billing inquiry",
+    "Product Purchased_Cancellation request",
+    "Product Purchased_Product inquiry",
+    "Product Purchased_Refund request",
+    "Product Purchased_Technical issue",
+    "Customer Age",
+    "days_since_purchase",
+    "response_hour_of_day",
+    "is_resolved",
+    "has_first_response",
+    "csat_available",
+    "char_count",
+    "word_count",
+    "subject_word_count",
+    "sentiment_compound"
+  ],
+  "stats": {
+    "Ticket Channel_enc": {
+      "mean": 1.507591,
+      "std": 1.114078,
+      "min": 0.0,
+      "max": 3.0,
+      "p25": 1.0,
+      "p50": 2.0,
+      "p75": 3.0,
+      "value_frequencies": {
+        "0.0": 0.244096,
+        "1.0": 0.255735,
+        "2.0": 0.24865,
+        "3.0": 0.251518
+      }
+    },
+    "Customer Gender_enc": {
+      "mean": 0.973516,
+      "std": 0.806816,
+      "min": 0.0,
+      "max": 2.0,
+      "p25": 0.0,
+      "p50": 1.0,
+      "p75": 2.0,
+      "value_frequencies": {
+        "0.0": 0.339069,
+        "1.0": 0.348347,
+        "2.0": 0.312584
+      }
+    },
+    "Product Purchased_Billing inquiry": {
+      "mean": 0.192961,
+      "std": 0.029382,
+      "min": 0.145203,
+      "max": 0.267436,
+      "p25": 0.170208,
+      "p50": 0.184939,
+      "p75": 0.213188
+    },
+    "Product Purchased_Cancellation request": {
+      "mean": 0.200033,
+      "std": 0.036163,
+      "min": 0.104116,
+      "max": 0.289026,
+      "p25": 0.176649,
+      "p50": 0.2,
+      "p75": 0.222067
+    },
+    "Product Purchased_Product inquiry": {
+      "mean": 0.1938,
+      "std": 0.029478,
+      "min": 0.132748,
+      "max": 0.258669,
+      "p25": 0.175789,
+      "p50": 0.18922,
+      "p75": 0.220677
+    },
+    "Product Purchased_Refund request": {
+      "mean": 0.206783,
+      "std": 0.034299,
+      "min": 0.126252,
+      "max": 0.295103,
+      "p25": 0.1893,
+      "p50": 0.206668,
+      "p75": 0.222946
+    },
+    "Product Purchased_Technical issue": {
+      "mean": 0.206291,
+      "std": 0.028742,
+      "min": 0.127024,
+      "max": 0.272791,
+      "p25": 0.192409,
+      "p50": 0.206892,
+      "p75": 0.219905
+    },
+    "Customer Age": {
+      "mean": 44.12888,
+      "std": 15.196384,
+      "min": 18.0,
+      "max": 70.0,
+      "p25": 31.0,
+      "p50": 44.0,
+      "p75": 57.0
+    },
+    "days_since_purchase": {
+      "mean": 879.267038,
+      "std": 210.652242,
+      "min": 518.0,
+      "max": 1247.0,
+      "p25": 696.0,
+      "p50": 877.0,
+      "p75": 1060.0
+    },
+    "response_hour_of_day": {
+      "mean": 7.269231,
+      "std": 8.189168,
+      "min": -1.0,
+      "max": 23.0,
+      "p25": -1.0,
+      "p50": 5.0,
+      "p75": 15.0,
+      "value_frequencies": {
+        "-1.0": 0.340081,
+        "0.0": 0.028003,
+        "1.0": 0.028509,
+        "2.0": 0.027665,
+        "3.0": 0.023279,
+        "4.0": 0.028003,
+        "5.0": 0.027665,
+        "6.0": 0.029184,
+        "7.0": 0.03087,
+        "8.0": 0.026991,
+        "9.0": 0.025472,
+        "10.0": 0.025641,
+        "11.0": 0.02969,
+        "12.0": 0.025472,
+        "13.0": 0.022605,
+        "14.0": 0.029015,
+        "15.0": 0.029858,
+        "16.0": 0.025472,
+        "17.0": 0.027497,
+        "18.0": 0.026316,
+        "19.0": 0.035256,
+        "20.0": 0.024966,
+        "21.0": 0.027159,
+        "22.0": 0.028509,
+        "23.0": 0.026822
+      }
+    },
+    "is_resolved": {
+      "mean": 0.325742,
+      "std": 0.468652,
+      "min": 0.0,
+      "max": 1.0,
+      "p25": 0.0,
+      "p50": 0.0,
+      "p75": 1.0,
+      "value_frequencies": {
+        "0.0": 0.674258,
+        "1.0": 0.325742
+      }
+    },
+    "has_first_response": {
+      "mean": 0.659919,
+      "std": 0.473736,
+      "min": 0.0,
+      "max": 1.0,
+      "p25": 0.0,
+      "p50": 1.0,
+      "p75": 1.0,
+      "value_frequencies": {
+        "0.0": 0.340081,
+        "1.0": 0.659919
+      }
+    },
+    "csat_available": {
+      "mean": 0.325742,
+      "std": 0.468652,
+      "min": 0.0,
+      "max": 1.0,
+      "p25": 0.0,
+      "p50": 0.0,
+      "p75": 1.0,
+      "value_frequencies": {
+        "0.0": 0.674258,
+        "1.0": 0.325742
+      }
+    },
+    "char_count": {
+      "mean": 281.603239,
+      "std": 44.04765,
+      "min": 136.0,
+      "max": 402.0,
+      "p25": 262.0,
+      "p50": 290.0,
+      "p75": 310.0
+    },
+    "word_count": {
+      "mean": 48.470479,
+      "std": 8.614816,
+      "min": 21.0,
+      "max": 67.0,
+      "p25": 45.0,
+      "p50": 50.0,
+      "p75": 55.0
+    },
+    "subject_word_count": {
+      "mean": 2.0,
+      "std": 0.0,
+      "min": 2.0,
+      "max": 2.0,
+      "p25": 2.0,
+      "p50": 2.0,
+      "p75": 2.0,
+      "value_frequencies": {
+        "2.0": 1.0
+      }
+    },
+    "sentiment_compound": {
+      "mean": 0.282139,
+      "std": 0.421186,
+      "min": -0.9549,
+      "max": 0.9869,
+      "p25": 0.0,
+      "p50": 0.3182,
+      "p75": 0.60725
+    }
+  }
+}

@@ -18,19 +18,24 @@ __pycache__/
 .env
 *.env.local
 
-# Data — raw data stays local, never in git
+# Data — raw and bulk processed data stays local
 /data/raw/
-/data/processed/
+/data/processed/cleaned_tickets.csv
+/data/processed/preprocessed_tickets.csv
+/data/processed/features/X_train_*.npy
+/data/processed/features/X_val_*.npy
+/data/processed/features/X_train_tfidf.npz
+/data/processed/features/X_val_tfidf.npz
+/data/processed/features/X_test_tfidf.npz
+/data/processed/features/y_*.npy
 
-# ML artifacts — large files
+# ML artifacts — large files only; model pkls/npys committed for Render deployment
 mlruns/
-/models/
+/models/distilbert/model.safetensors
 /artifacts/charts/
-/artifacts/drift/
+/artifacts/drift/dag_drift_report_*.json
 /artifacts/tmp/
 /artifacts/reports/drift_report_*.html
-*.pkl
-*.pt
 *.h5
 *.onnx
 
