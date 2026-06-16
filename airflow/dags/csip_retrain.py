@@ -1,9 +1,9 @@
 # filename: airflow/dags/csip_retrain.py
-# purpose:  DAG 3 — Weekly model retraining with 3-branch promotion guard.
-#           Trains LGBM type classifier, XGB priority classifier, RF regressor.
+# purpose:  DAG 3 — Weekly model retraining with per-task drift gating + 3-branch promotion guard.
+#           Each retrain task is gated by a ShortCircuitOperator that checks per-task PSI drift.
 #           Branch: promote (F1 +0.02) | skip (within bounds) | alert (F1 -0.05).
 #           Drift baseline regenerated atomically after successful promotion.
-# version:  1.0
+# version:  1.1
 
 import logging
 import os
@@ -15,7 +15,7 @@ from pathlib import Path
 
 from airflow.exceptions import AirflowSkipException  # noqa: F401 — module-level: cross_project_ml.md rule
 from airflow.models import DAG
-from airflow.operators.python import BranchPythonOperator, PythonOperator
+from airflow.operators.python import BranchPythonOperator, PythonOperator, ShortCircuitOperator
 from airflow.utils.trigger_rule import TriggerRule
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -36,6 +36,85 @@ _DEFAULT_ARGS = {
 }
 
 _TMP_DIR = _PROJECT_ROOT / "artifacts" / "tmp"
+
+# ---------------------------------------------------------------------------
+# Per-task feature groups for drift-gated retraining (Phase C).
+# Feature names match section_12_metrics.json PSI key names exactly.
+# ---------------------------------------------------------------------------
+
+_FEATURE_GROUPS: dict[str, list[str]] = {
+    "type": [
+        # Text-derived features most relevant to ticket type classification
+        "word_count", "char_count", "subject_word_count", "sentiment_compound",
+    ],
+    "priority": [
+        # Tabular features used by XGB priority classifier (SHAP top: days_since_purchase)
+        "Customer Age", "Ticket Channel_enc", "Customer Gender_enc",
+        "has_first_response", "is_resolved", "csat_available", "days_since_purchase",
+    ],
+    "regressor": [
+        # Features with SHAP signal for resolution time (SHAP top: response_hour_of_day)
+        "response_hour_of_day", "days_since_purchase", "Customer Age",
+    ],
+}
+
+
+def _should_retrain(task_name: str, feature_group: list[str]) -> bool:
+    """
+    Returns True if any feature in feature_group shows PSI > threshold in the
+    last recorded drift check (section_12_metrics.json, scenario: train_vs_test).
+
+    Fail-open: returns True (retrain) if the metrics file cannot be read, so a
+    broken gate never silently skips retraining on genuinely drifted data.
+    """
+    import json as _json
+    try:
+        metrics_path = _PROJECT_ROOT / "artifacts" / "metrics" / "section_12_metrics.json"
+        metrics = _json.loads(metrics_path.read_text())
+        psi_scores: dict = (
+            metrics
+            .get("scenarios", {})
+            .get("train_vs_test", {})
+            .get("custom_psi", {})
+            .get("feature_scores", {})
+        )
+        threshold = float(metrics.get("drift_psi_threshold", 0.1))
+
+        if not psi_scores:
+            logger.warning(
+                "[%s] No PSI scores in section_12_metrics.json — RETRAIN (fail-open)", task_name,
+            )
+            return True
+
+        task_psi = {f: psi_scores.get(f, 0.0) for f in feature_group}
+        should = any(v > threshold for v in task_psi.values())
+        logger.info(
+            "[%s] PSI gate: %s | threshold=%.2f | should_retrain=%s",
+            task_name, {k: round(v, 4) for k, v in task_psi.items()}, threshold, should,
+        )
+        return should
+
+    except Exception as exc:
+        logger.warning(
+            "[%s] Could not read drift metrics (%s) — RETRAIN (fail-open)", task_name, exc,
+        )
+        return True
+
+
+def _gate_type_retrain(**context) -> bool:
+    """ShortCircuitOperator: pass through to retrain if type features show drift."""
+    return _should_retrain("type", _FEATURE_GROUPS["type"])
+
+
+def _gate_priority_retrain(**context) -> bool:
+    """ShortCircuitOperator: pass through to retrain if priority features show drift."""
+    return _should_retrain("priority", _FEATURE_GROUPS["priority"])
+
+
+def _gate_regressor_retrain(**context) -> bool:
+    """ShortCircuitOperator: pass through to retrain if regressor features show drift."""
+    return _should_retrain("regressor", _FEATURE_GROUPS["regressor"])
+
 
 # ---------------------------------------------------------------------------
 # Notification stub — shared by alert_regression
@@ -344,24 +423,32 @@ def _evaluate_new_models(**context) -> None:
     Aggregate val metrics from the three parallel retrain tasks.
     mean_new_f1 = (type_f1 + priority_f1) / 2.
     Regressor RMSE tracked separately — does not gate promotion (monitored via DAG 4).
+    If a task was short-circuited by a drift gate, its XCom is None; falls back to
+    champion F1 so the evaluation and promotion decision still proceed correctly.
     All XCom values cast to float() to prevent np.float64 JSON serialization errors.
     """
     ti = context["ti"]
 
-    type_f1      = ti.xcom_pull(task_ids="retrain_type_clf",      key="type_clf_val_f1")
-    priority_f1  = ti.xcom_pull(task_ids="retrain_priority_clf",  key="priority_clf_val_f1")
-    regressor_rmse = ti.xcom_pull(task_ids="retrain_regressor",   key="regressor_val_rmse")
-    champion_m   = ti.xcom_pull(task_ids="load_training_data",    key="champion_metrics")
+    type_f1        = ti.xcom_pull(task_ids="retrain_type_clf",     key="type_clf_val_f1")
+    priority_f1    = ti.xcom_pull(task_ids="retrain_priority_clf", key="priority_clf_val_f1")
+    regressor_rmse = ti.xcom_pull(task_ids="retrain_regressor",    key="regressor_val_rmse")
+    champion_m     = ti.xcom_pull(task_ids="load_training_data",   key="champion_metrics")
 
-    if None in (type_f1, priority_f1, regressor_rmse, champion_m):
-        missing = [
-            n for n, v in [("type_f1", type_f1), ("priority_f1", priority_f1),
-                           ("regressor_rmse", regressor_rmse), ("champion_m", champion_m)]
-            if v is None
-        ]
+    if champion_m is None:
         raise ValueError(
-            f"XCom missing for: {missing} — task(s) may have failed. Check task logs."
+            "load_training_data XCom unavailable — champion_metrics missing. Check task logs."
         )
+
+    # Skipped tasks (drift gate returned False) produce None XCom — fall back to champion metric
+    if type_f1 is None:
+        type_f1 = float(champion_m["type_f1"])
+        logger.info("type retrain was drift-gated (skipped) — using champion F1=%.4f", type_f1)
+    if priority_f1 is None:
+        priority_f1 = float(champion_m["priority_f1"])
+        logger.info("priority retrain was drift-gated (skipped) — using champion F1=%.4f", priority_f1)
+    if regressor_rmse is None:
+        regressor_rmse = 0.0  # not used in promotion gate; 0.0 is a safe placeholder
+        logger.info("regressor retrain was drift-gated (skipped)")
 
     mean_new_f1 = float((float(type_f1) + float(priority_f1)) / 2)
 
@@ -427,19 +514,19 @@ def _promote_models(**context) -> None:
         MODEL_REGISTRY_PATH, TABULAR_ENCODER_PATH,
     )
 
-    promotions = [
+    all_candidates = [
         (_TMP_DIR / "lgbm_type_retrain.pkl",    LGBM_TYPE_PATH),
         (_TMP_DIR / "xgb_priority_retrain.pkl", XGB_PRIORITY_PATH),
         (_TMP_DIR / "rf_regressor_retrain.pkl", RF_REGRESSOR_PATH),
     ]
-
-    # Pre-flight: verify ALL temp files exist before touching any production path
-    missing = [str(src) for src, _ in promotions if not src.exists()]
-    if missing:
-        raise FileNotFoundError(
-            f"Temp model(s) missing — aborting promotion. "
-            f"Production models untouched. Missing: {missing}"
+    # Only promote tasks that ran (drift gate passed); skipped tasks leave no tmp pkl
+    promotions = [(src, dst) for src, dst in all_candidates if src.exists()]
+    if not promotions:
+        logger.info(
+            "No new models to promote — all retrain tasks were drift-gated. "
+            "Production models untouched."
         )
+        return
 
     # Promote: shutil.move handles cross-device moves (Docker volume → host path)
     for src, dst in promotions:
@@ -605,6 +692,24 @@ with DAG(
         python_callable=_load_training_data,
     )
 
+    gate_type_retrain = ShortCircuitOperator(
+        task_id="gate_type_retrain",
+        python_callable=_gate_type_retrain,
+        ignore_downstream_trigger_rules=False,  # only skip the immediate downstream chain
+    )
+
+    gate_priority_retrain = ShortCircuitOperator(
+        task_id="gate_priority_retrain",
+        python_callable=_gate_priority_retrain,
+        ignore_downstream_trigger_rules=False,
+    )
+
+    gate_regressor_retrain = ShortCircuitOperator(
+        task_id="gate_regressor_retrain",
+        python_callable=_gate_regressor_retrain,
+        ignore_downstream_trigger_rules=False,
+    )
+
     retrain_type_clf = PythonOperator(
         task_id="retrain_type_clf",
         python_callable=_retrain_type_clf,
@@ -623,6 +728,9 @@ with DAG(
     evaluate_new_models = PythonOperator(
         task_id="evaluate_new_models",
         python_callable=_evaluate_new_models,
+        # NONE_FAILED_MIN_ONE_SUCCESS: runs when at least one retrain task succeeded
+        # and none failed (skipped tasks are fine — their XComs fall back to champion).
+        trigger_rule=TriggerRule.NONE_FAILED_MIN_ONE_SUCCESS,
     )
 
     promotion_branch = BranchPythonOperator(
@@ -652,7 +760,13 @@ with DAG(
     )
 
     # Task dependency graph
-    load_training_data >> [retrain_type_clf, retrain_priority_clf, retrain_regressor]
+    # Each retrain task is gated by a ShortCircuitOperator that checks per-task PSI drift.
+    # evaluate_new_models uses NONE_FAILED_MIN_ONE_SUCCESS so it runs when at least one
+    # retrain task succeeded (skipped tasks fall back to champion metrics inside the callable).
+    load_training_data >> [gate_type_retrain, gate_priority_retrain, gate_regressor_retrain]
+    gate_type_retrain     >> retrain_type_clf
+    gate_priority_retrain >> retrain_priority_clf
+    gate_regressor_retrain >> retrain_regressor
     [retrain_type_clf, retrain_priority_clf, retrain_regressor] >> evaluate_new_models
     evaluate_new_models >> promotion_branch
     promotion_branch >> [promote_models, skip_retrain, alert_regression]
