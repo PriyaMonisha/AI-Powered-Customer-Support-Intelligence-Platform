@@ -2,20 +2,24 @@
 # purpose:  Build model-ready feature rows from a TicketRequest at inference time
 # version:  1.0
 
+import json
 import logging
 
 import numpy as np
 import pandas as pd
 
-from config import PREPROCESSED_DATA_PATH
+from config import ARTIFACTS_DIR
 from src.features.tabular_features import ALL_TABULAR_FEATURES
 
 log = logging.getLogger(__name__)
 
-# Computed once at import time — training median, NOT 0.0 ("bought today" is a real value)
-DAYS_SINCE_PURCHASE_MEDIAN: float = float(
-    pd.read_csv(PREPROCESSED_DATA_PATH, usecols=["days_since_purchase"])["days_since_purchase"].median()
-)
+# Training median saved at notebook time — avoids reading the gitignored CSV at import.
+_TRAINING_STATS_PATH = ARTIFACTS_DIR / "metrics" / "training_stats.json"
+try:
+    with open(_TRAINING_STATS_PATH) as _f:
+        DAYS_SINCE_PURCHASE_MEDIAN: float = float(json.load(_f)["days_since_purchase_median"])
+except Exception:
+    DAYS_SINCE_PURCHASE_MEDIAN = 882.0  # fallback: training set median
 
 
 def build_inference_row(req) -> pd.DataFrame:
