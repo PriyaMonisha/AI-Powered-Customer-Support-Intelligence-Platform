@@ -10,7 +10,7 @@ import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from airflow.exceptions import AirflowSkipException  # module-level: cross_project_ml.md rule
+from airflow.exceptions import AirflowSkipException  # noqa: F401 — module-level: cross_project_ml.md rule
 from airflow.models import DAG
 from airflow.operators.python import BranchPythonOperator, PythonOperator
 
@@ -31,6 +31,7 @@ _DEFAULT_ARGS = {
 # ---------------------------------------------------------------------------
 # Notification stub — shared by alert_drift
 # ---------------------------------------------------------------------------
+
 
 def _send_notification_stub(subject: str, body: str) -> None:
     """

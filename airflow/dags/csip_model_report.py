@@ -12,7 +12,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from airflow.exceptions import AirflowSkipException  # module-level: cross_project_ml.md rule
+from airflow.exceptions import AirflowSkipException  # noqa: F401 — module-level: cross_project_ml.md rule
 from airflow.models import DAG
 from airflow.operators.python import PythonOperator
 
@@ -187,7 +187,6 @@ def _update_model_registry(**context) -> None:
         registry: dict = json.load(fh)
 
     clf_rows = leaderboard.get("classifiers", [])
-    reg_rows = leaderboard.get("regressors", [])
 
     # Update best classifier metrics if better than current
     for row in clf_rows:

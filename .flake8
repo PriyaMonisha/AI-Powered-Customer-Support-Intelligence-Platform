@@ -1,0 +1,32 @@
+# filename: .flake8
+# purpose:  Lint config for the production/serving codebase (src/, api/,
+#           dash_app/, tests/, config.py). Enforced fully in CI.
+#
+#           notebooks/ are one-shot terminal/Colab scripts that follow a
+#           deliberate "# Cell N" structure with shared boilerplate import
+#           blocks; several (e.g. 09_distilbert.py) are GPU-validated and
+#           already committed with real run results. They get a relaxed
+#           per-file-ignore below rather than a mass cosmetic rewrite.
+#
+#           extend-ignore covers this codebase's deliberate aligned-constant
+#           style (E221/E222/E272), notebook sys.path-before-import pattern
+#           (E402), and the compact `fig.savefig(...); plt.close(fig)` /
+#           one-line-branch idiom used throughout chart/plot helpers
+#           (E701/E702). E203 is the standard Black-compatible slice ignore.
+# version:  1.0
+
+[flake8]
+max-line-length = 130
+extend-ignore = E203,E221,E222,E272,E402,E701,E702
+exclude =
+    .git,
+    __pycache__,
+    venv,
+    .venv,
+    mlruns,
+    models,
+    data,
+    artifacts
+
+per-file-ignores =
+    notebooks/*.py: E128,E131,E231,E301,E302,E305,E401,E501,E731,F401,F541,F811,W292

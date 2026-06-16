@@ -13,7 +13,7 @@ import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from airflow.exceptions import AirflowSkipException  # module-level: cross_project_ml.md rule
+from airflow.exceptions import AirflowSkipException  # noqa: F401 — module-level: cross_project_ml.md rule
 from airflow.models import DAG
 from airflow.operators.python import BranchPythonOperator, PythonOperator
 from airflow.utils.trigger_rule import TriggerRule
@@ -40,6 +40,7 @@ _TMP_DIR = _PROJECT_ROOT / "artifacts" / "tmp"
 # ---------------------------------------------------------------------------
 # Notification stub — shared by alert_regression
 # ---------------------------------------------------------------------------
+
 
 def _send_notification_stub(subject: str, body: str) -> None:
     """Send Slack notification if CSIP_ALERT_WEBHOOK is set; otherwise log only."""
@@ -68,7 +69,6 @@ def _load_training_data(**context) -> None:
     and champion F1 scores from model_registry.json for comparison.
     """
     import json
-    import numpy as np
     from config import FEATURES_DIR, MODEL_REGISTRY_PATH
 
     # C-4: clear stale temp models from any previous failed run
@@ -263,7 +263,10 @@ def _retrain_regressor(**context) -> None:
     from sklearn.ensemble import RandomForestRegressor
     from sklearn.metrics import mean_squared_error
     from sklearn.model_selection import KFold
-    from config import FEATURES_DIR, MODELS_DIR, FAST_MODE, FAST_N_TRIALS, FAST_CV_FOLDS, FULL_N_TRIALS, FULL_CV_FOLDS, RANDOM_STATE, REGRESSOR_KEEP_MASK_PATH
+    from config import (
+        FEATURES_DIR, FAST_MODE, FAST_N_TRIALS, FAST_CV_FOLDS,
+        FULL_N_TRIALS, FULL_CV_FOLDS, RANDOM_STATE, REGRESSOR_KEEP_MASK_PATH,
+    )
     from src.models.advanced_regressor import AdvancedRegressor
 
     optuna.logging.set_verbosity(optuna.logging.WARNING)
@@ -353,7 +356,7 @@ def _evaluate_new_models(**context) -> None:
     if None in (type_f1, priority_f1, regressor_rmse, champion_m):
         missing = [
             n for n, v in [("type_f1", type_f1), ("priority_f1", priority_f1),
-                            ("regressor_rmse", regressor_rmse), ("champion_m", champion_m)]
+                           ("regressor_rmse", regressor_rmse), ("champion_m", champion_m)]
             if v is None
         ]
         raise ValueError(
@@ -419,7 +422,6 @@ def _promote_models(**context) -> None:
     Post-promote: assert TABULAR_ENCODER_PATH exists (CE-4 fix).
     """
     import json
-    import shutil
     from config import (
         LGBM_TYPE_PATH, XGB_PRIORITY_PATH, RF_REGRESSOR_PATH,
         MODEL_REGISTRY_PATH, TABULAR_ENCODER_PATH,
@@ -486,7 +488,6 @@ def _regenerate_drift_baseline(**context) -> None:
     Atomic write: .json.tmp → shutil.move.
     """
     import json
-    import shutil
     from datetime import datetime, timezone
 
     import numpy as np

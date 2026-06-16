@@ -253,8 +253,8 @@ def clean_pipeline(df: pd.DataFrame) -> pd.DataFrame:
     audit_null_dependency(df)        # Step 1: must be first — validates raw data assumptions
     df = drop_pii(df)                # Step 2: PII removed before any processing
     df = parse_datetimes(df)         # Step 3: dtypes fixed before derived computations
-    df = compute_hours_to_resolve(df) # Step 4: needs parsed datetimes
-    df = compute_derived_features(df) # Step 5: needs parsed datetimes
+    df = compute_hours_to_resolve(df)  # Step 4: needs parsed datetimes
+    df = compute_derived_features(df)  # Step 5: needs parsed datetimes
     df = fix_description_placeholder(df)  # Step 6: text fix before NLP pipeline
     df = handle_nulls(df)            # Step 7: sentinel fills after all derived columns computed
     df = standardize_strings(df)     # Step 8: final pass, catches any trailing spaces

@@ -1,0 +1,60 @@
+{
+  "section": "9b",
+  "fast_mode": true,
+  "n_test_sampled": 300,
+  "sample_accuracy": 0.243333,
+  "top_k_tokens": 16,
+  "correct_example": {
+    "true_label": "Technical issue",
+    "pred_label": "Technical issue",
+    "confidence": 0.318997,
+    "top_tokens": [
+      "[CLS]",
+      "battery",
+      "[SEP]",
+      "'",
+      "mac",
+      "pro",
+      "assist",
+      "'",
+      "action",
+      "mac",
+      "##book",
+      "pro",
+      ".",
+      "steps",
+      "?",
+      "[SEP]"
+    ],
+    "pct_top_tokens_special_or_punct": 0.4375
+  },
+  "wrong_example": {
+    "true_label": "Cancellation request",
+    "pred_label": "Technical issue",
+    "confidence": 0.328535,
+    "top_tokens": [
+      "[CLS]",
+      "delivery",
+      "[SEP]",
+      "'",
+      "go",
+      "##pro",
+      "hero",
+      ".",
+      "assist",
+      ".",
+      "'",
+      "device",
+      "settings",
+      "configured",
+      ".",
+      "[SEP]"
+    ],
+    "pct_top_tokens_special_or_punct": 0.5
+  },
+  "interpretation": "44% of the top-16 [CLS]-attended tokens in the correct example and 50% in the misclassified example are special/punctuation tokens rather than class-indicative content words. This is consistent with Section 9's finding (test F1-macro=0.1954, tied with the 0.20 noise floor) that Ticket Type carries no learnable signal from text.",
+  "artifacts": {
+    "correct_heatmap": "artifacts\\charts\\distilbert_attention_correct.png",
+    "wrong_heatmap": "artifacts\\charts\\distilbert_attention_wrong.png"
+  }
+}

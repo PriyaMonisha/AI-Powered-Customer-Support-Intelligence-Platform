@@ -8,7 +8,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from airflow.exceptions import AirflowSkipException  # module-level: cross_project_ml.md rule
+from airflow.exceptions import AirflowSkipException  # noqa: F401 — module-level: cross_project_ml.md rule
 from airflow.models import DAG
 from airflow.operators.python import PythonOperator
 
@@ -83,7 +83,6 @@ def _validate_schema(**context) -> None:
 
 def _etl_to_postgres(**context) -> None:
     """Upsert cleaned tickets into PostgreSQL tickets table."""
-    import pandas as pd
     from config import PROCESSED_DATA_DIR
     from src.data.etl import load_csv_to_postgres
 

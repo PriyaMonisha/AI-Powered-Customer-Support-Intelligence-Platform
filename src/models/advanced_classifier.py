@@ -29,7 +29,7 @@ class AdvancedClassifier:
     model_name:    str
     task:          str
     model:         BaseEstimator
-    feature_schema:str
+    feature_schema: str
     n_features_in: int  = 0
     best_params:   dict = field(default_factory=dict)
 
