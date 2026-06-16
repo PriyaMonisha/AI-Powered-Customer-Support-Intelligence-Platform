@@ -2,6 +2,7 @@
 
 > **8,469 support tickets · 3 ML tasks · DistilBERT + classical ML · Full MLOps stack**
 
+[![CI](https://github.com/PriyaMonisha/AI-Powered-Customer-Support-Intelligence-Platform/actions/workflows/ci.yml/badge.svg)](https://github.com/PriyaMonisha/AI-Powered-Customer-Support-Intelligence-Platform/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat&logo=python&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.3.0-EE4C2C?style=flat&logo=pytorch&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?style=flat&logo=fastapi&logoColor=white)

@@ -45,7 +45,7 @@ glove.*.zip
 *.log
 logs/
 
-# Claude memory and config — never in public repo
+# Dev tool memory and config — not for public repo
 .claude/
 CLAUDE.md
 INTERVIEW_PREP_*.md

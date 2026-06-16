@@ -457,7 +457,7 @@ After this pass, three items were deferred to subsequent passes — all three we
 in §5.17 and §5.18 below.
 
 ### 5.17 Mentor Checklist Completion Pass
-After completing Section 15, a cross-check against the GUVI project specification identified
+After completing Section 15, a cross-check against the project specification identified
 six remaining gaps. Three were closed in code this pass; three are external-decision items
 (GitHub push, HF Spaces deployment, DistilBERT `Trainer.hyperparameter_search` — see §8):
 
