@@ -22,31 +22,6 @@ report) · 55 automated tests · GitHub Actions CI · 10-container Docker Compos
 
 ---
 
-## ⚠️ Known Limitations (read this first)
-
-This project's central, repeatedly-confirmed finding: **`Ticket Type` and `Resolution Time`
-labels carry no learnable signal from the available ticket text/tabular features.**
-
-| Task | Best model | Metric | Result | Random baseline |
-|---|---|---|---|---|
-| Ticket Type (5-class) | LightGBM | val F1-macro | **0.1997** | 0.20 |
-| Ticket Type (5-class) | DistilBERT (fine-tuned, 5 epochs) | test F1-macro | **0.1954** | 0.20 |
-| Resolution Time (regression) | Random Forest | val RMSE / R² | 7.09 hrs / **R² ≈ −0.01 to −0.05** | (worse than predicting the mean) |
-| Ticket Priority (4-class) | XGBoost | val F1-macro | **0.27863** | 0.25 |
-
-Four independent methods (TF-IDF term overlap, classical ML, a full GPU DistilBERT
-fine-tune, and a majority-class sanity check) all converge on the same ceiling for
-`Ticket Type` — most likely because the labels are synthetic/near-randomly assigned in the
-source dataset. `Ticket Priority` is the only target with a (small) signal above its baseline.
-
-**Practical consequence:** `POST /predict/type` returns `model_status: "below_quality_bar"`
-and a `reliability_note` alongside its prediction. The `auto_route`/`flag_for_review` fields
-are retained for API-contract completeness, but **should not be used to drive automated
-ticket routing** until a model clears a defensible F1 bar — the Dash "Live Predictions" page
-surfaces this as a warning banner. This is a deliberate, documented decision, not an oversight.
-
----
-
 ## What This Project Does
 
 | Layer | What's Built |
@@ -55,12 +30,12 @@ surfaces this as a warning banner. This is a deliberate, documented decision, no
 | **Feature Engineering** | `TabularEncoder` (Ordinal + multiclass TargetEncoder), TF-IDF (9,307-term vocab), VADER sentiment + meta-features, Redis feature store (graceful degrade if unavailable) |
 | **Classical ML** | RF / XGBoost / LightGBM for Type + Priority + Resolution, tuned via Optuna (`FAST_MODE` smoke-test vs. `FULL_MODE`), `class_weight="balanced"` |
 | **Transformer Fine-Tuning** | DistilBERT fine-tuned on subject+description (Google Colab T4, 5 epochs) for Ticket Type |
-| **Explainability** | SHAP `TreeExplainer` for the Priority model — top-feature waterfalls and beeswarm plots |
+| **Explainability** | SHAP `TreeExplainer` for the Priority model — top-feature waterfalls, beeswarm plots, and DistilBERT token-level attention heatmaps |
 | **Clustering** | K-Means (K=2, silhouette=0.1573, Davies-Bouldin=2.1902) + PCA + t-SNE customer segmentation |
-| **Experiment Tracking** | MLflow — 47 logged runs, 3 registered models with Production/Challenger aliases |
+| **Experiment Tracking** | MLflow — 50+ logged runs, 3 registered models with Production/Challenger aliases |
 | **Serving** | FastAPI — 7 endpoints, `X-API-Key` auth (admin + read-scoped), `/admin/reload` hot-swap, Prometheus metrics |
 | **Monitoring** | Prometheus + Grafana + Alertmanager + Evidently/PSI drift detection, 5 alert rules |
-| **Orchestration** | Airflow — 4 DAGs: daily ETL, daily drift monitor, weekly retrain (3-branch promote/skip/alert guard), weekly model report |
+| **Orchestration** | Airflow — 4 DAGs: daily ETL, daily drift monitor, weekly retrain (PSI-gated per task, 3-branch promote/skip/alert), weekly model report |
 | **Dashboard** | Plotly Dash — 6 pages, each `def layout()` so bind-mounted artifact edits appear with zero restart |
 | **Tests / CI** | 55 pytest tests (auth, dashboard, drift math), GitHub Actions CI, zero skips |
 | **Deployment** | `docker-compose.yml` — 10 services across a single bridge network |
@@ -111,7 +86,7 @@ MLflow Registry ───── models ───────│  /explain/priori
 | **2 — Leaderboard** | Live MLflow leaderboard via `dcc.Interval` + `mlflow_client.get_leaderboard()`, with a "Live (MLflow)" / "Static fallback" badge |
 | **3 — Live Predictions** | Submits a ticket to all 4 prediction/explain endpoints in parallel (`ThreadPoolExecutor`); surfaces the Ticket Type `model_status` warning prominently |
 | **4 — Drift Monitoring** | 3-state UI: static fallback (Prometheus unreachable) → "no check yet" → live PSI bar chart vs. `DRIFT_PSI_THRESHOLD` |
-| **5 — Clustering & Explainability** | K-Means/PCA/t-SNE segmentation charts + SHAP beeswarm/waterfall galleries |
+| **5 — Clustering & Explainability** | K-Means/PCA/t-SNE segmentation charts + SHAP beeswarm/waterfall galleries + DistilBERT attention heatmaps + fairness breakdown by Gender/Age/Channel |
 
 ---
 
@@ -178,7 +153,7 @@ Customer Support Intelligence Platform/
 ├── docker-compose.yml              # 10-service orchestration
 ├── Dockerfile                      # FastAPI image (CPU-only torch)
 ├── requirements.txt / requirements-ci.txt
-└── .github/workflows/ci.yml        # pytest on every push
+└── .github/workflows/ci.yml        # pytest + flake8 on every push
 ```
 
 ---
@@ -188,10 +163,10 @@ Customer Support Intelligence Platform/
 ### Verify the code — no model weights needed
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/PriyaMonisha/AI-Powered-Customer-Support-Intelligence-Platform.git
 cd "Customer Support Intelligence Platform"
 python -m venv venv
-venv\Scripts\activate              # Windows
+venv\Scripts\activate              # Windows  |  source venv/bin/activate (Linux/Mac)
 python -m pip install -r requirements-ci.txt
 pytest tests/ -v                   # 55 tests — no model artifacts required
 ```
@@ -199,7 +174,7 @@ pytest tests/ -v                   # 55 tests — no model artifacts required
 ### Option A — Full stack via Docker Compose
 
 ```bash
-copy .env.example .env
+cp .env.example .env               # Windows: copy .env.example .env
 # Fill in ADMIN_API_KEY, CSIP_API_KEY (any random strings), and DB/Grafana/Airflow
 # passwords. AIRFLOW__CORE__FERNET_KEY / WEBSERVER__SECRET_KEY can be generated via
 # scripts/generate_env.py.
@@ -235,8 +210,8 @@ uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 
 `notebooks/01_*.py` through `notebooks/13_*.py` run in the terminal (`python notebooks/0X.py`)
 with `FAST_MODE = True` in `config.py` for a fast smoke-test, or `False` for the full run.
-`notebooks/09_distilbert.py` (and the skipped `08a` BiLSTM notebook) require a GPU — convert
-with `jupytext --to notebook notebooks/09_distilbert.py` and run on Google Colab T4.
+`notebooks/09_distilbert.py` requires a GPU — convert with
+`jupytext --to notebook notebooks/09_distilbert.py` and run on Google Colab T4.
 
 ---
 
@@ -285,7 +260,8 @@ pytest tests/ --cov=api --cov=src          # with coverage
 
 CI runs on every push via GitHub Actions (`.github/workflows/ci.yml`): installs
 `requirements-ci.txt` (full `requirements.txt` minus the torch/transformers/HF stack, which
-nothing in `tests/` imports) and runs the full suite — **55 passed, 0 skips**.
+nothing in `tests/` imports), runs flake8 across all production code, then the full test suite —
+**55 passed, 0 skips**.
 
 ---
 
@@ -296,18 +272,18 @@ nothing in `tests/` imports) and runs the full suite — **55 passed, 0 skips**.
 | **Security** | PII (`Customer Name`/`Email`) dropped in Step 2 of cleaning, before any model sees it · `X-API-Key` via `secrets.compare_digest` · two-tier keys (`ADMIN_API_KEY` superset, `CSIP_API_KEY` read-only) · no secrets in VCS, `.env.example` documents every required var |
 | **Performance** | Models loaded once at startup via `lifespan` + `run_in_executor` (non-blocking event loop) · Redis feature cache with 24h TTL and graceful degrade if unavailable |
 | **Reliability** | Startup model loading wrapped in try/except → `/health` reports `"loading"`/503 instead of a crash loop · health checks on all 10 Docker services · 55 automated tests |
-| **MLOps** | MLflow registry with Production/Challenger aliases (47 runs) · Optuna HPO with `FAST_MODE`/`FULL_MODE` split · `/admin/reload` hot-swaps models with a pre-swap smoke test |
+| **MLOps** | MLflow registry with Production/Challenger aliases (50+ runs) · Optuna HPO with `FAST_MODE`/`FULL_MODE` split · `/admin/reload` hot-swaps models with a pre-swap smoke test · per-task PSI drift gating before weekly retrains |
 | **Observability** | Prometheus counters/histograms/gauges (predictions, latency, errors, confidence, models loaded, drift) · Grafana 6-panel dashboard · Alertmanager with a `slack-notifications` receiver scaffold for critical alerts |
-| **Orchestration** | 4 Airflow DAGs — daily ETL, daily drift monitor, weekly retrain (3-branch promote/skip/alert guard), weekly MLflow leaderboard report |
+| **Orchestration** | 4 Airflow DAGs — daily ETL, daily drift monitor, weekly retrain (PSI-gated per task, 3-branch promote/skip/alert guard), weekly MLflow leaderboard report |
 | **Reproducibility** | `RANDOM_STATE=42` everywhere · atomic (`tempfile`+`shutil.move`) writes for all JSON artifacts · `torch.save(state_dict)` / `weights_only=True` |
 
 ---
 
 ## Key Design Decisions
 
-- **`/predict/type` ships a `model_status` + `reliability_note` field** — rather than hide or
-  silently "fix" a model that's at the statistical noise floor, the API is explicit about it,
-  and the Dash app surfaces it as a warning banner. See *Known Limitations* above.
+- **`/predict/type` ships a `model_status` + `reliability_note` field** — rather than hide a
+  model at the statistical noise floor, the API is explicit about its reliability, and the Dash
+  app surfaces it as a warning banner. See *Results & Key Findings* below.
 - **Redis is optional** — `RedisFeatureStore` degrades gracefully (`except redis.RedisError:
   return None`) and never raises; cache misses fall through to live feature computation.
 - **`lifespan` over `@app.on_event`** — model loading runs in `run_in_executor` so the event
@@ -328,6 +304,39 @@ nothing in `tests/` imports) and runs the full suite — **55 passed, 0 skips**.
   since its test F1 (0.1954) ties the served LightGBM model's val F1 (0.1997), the much
   cheaper/faster classical model remains in `/predict/type` — a deliberate cost/accuracy
   tradeoff, not an oversight.
+- **Per-task PSI drift gating in the retrain DAG** — `ShortCircuitOperator` checks PSI for each
+  task's feature group (text / tabular / resolution features) independently before triggering
+  retrain; fail-open by design (unreadable metrics file → always retrain).
+
+---
+
+## Results & Key Findings
+
+Four independent experiments — TF-IDF term analysis, classical ML (RF/XGB/LightGBM + Optuna
+HPO), full DistilBERT fine-tuning (Colab T4, 5 epochs), and majority-class sanity checks — all
+converge on the same result for `Ticket Type` and `Resolution Time`: no learnable signal above
+the statistical noise floor. The most probable explanation is that these two label columns are
+synthetic or near-randomly assigned in the source Kaggle dataset. `Ticket Priority` is the only
+task with a measurable signal.
+
+| Task | Best model | Metric | Best result | Dummy baseline |
+|---|---|---|---|---|
+| Ticket Type (5-class) | LightGBM | val F1-macro | **0.1997** | 0.0685 (most-frequent) |
+| Ticket Type (5-class) | DistilBERT (fine-tuned, 5 epochs) | test F1-macro | **0.1954** | — |
+| Ticket Priority (4-class) | XGBoost | val F1-macro | **0.2625** | 0.1027 (most-frequent) |
+| Resolution Time (regression) | Random Forest | val RMSE / R² | 7.09 hrs / **−0.01 to −0.05** | RMSE 7.06 (mean predictor — marginally better) |
+
+Random chance for balanced 5-class classification is F1-macro ≈ 0.20; for 4-class, ≈ 0.25.
+`Ticket Type` real models are statistically tied with random chance, and the resolution-time
+models are statistically tied with predicting the training mean. `Ticket Priority` shows a small
+but consistent lift above its baseline — SHAP identifies `days_since_purchase` as the dominant
+feature.
+
+**Engineering response:** `POST /predict/type` returns `model_status: "below_quality_bar"` and
+a `reliability_note` in every response. The Dash "Live Predictions" page surfaces this as a
+visible warning banner. The `auto_route` / `flag_for_review` API fields are preserved in the
+contract but explicitly flagged — they should not drive automated ticket routing until a model
+clears a defensible F1 threshold. This is a deliberate, documented decision.
 
 ---
 

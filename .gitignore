@@ -50,6 +50,10 @@ logs/
 CLAUDE.md
 INTERVIEW_PREP_*.md
 
+# Course material PDFs — not project code
+*.pdf
+*.docx
+
 # OS
 .DS_Store
 Thumbs.db
