@@ -20,11 +20,8 @@ htmlcov/
 # Secrets — never bake into an image
 .env
 
-# Bind-mounted at runtime (see docker-compose.yml volumes)
+# MLflow runs — large, regenerable, bind-mounted locally
 mlruns/
-models/
-data/
-artifacts/
 
 # Notebooks — terminal .py scripts + gitignored .ipynb, no purpose in either image
 notebooks/
