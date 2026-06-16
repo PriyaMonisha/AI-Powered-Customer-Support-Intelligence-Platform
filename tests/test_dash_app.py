@@ -123,8 +123,10 @@ def test_histogram_color_returns_one_hex_color():
     assert charts.histogram_color().startswith("#")
 
 
-def test_chart_exists_returns_bool_without_raising():
-    assert charts.chart_exists("eda_01_ticket_type_dist.png") is True
+def test_chart_exists_returns_bool_without_raising(tmp_path, monkeypatch):
+    monkeypatch.setattr(charts, "CHARTS_DIR", tmp_path)
+    (tmp_path / "existing.png").touch()
+    assert charts.chart_exists("existing.png") is True
     assert charts.chart_exists("does_not_exist.png") is False
 
 
