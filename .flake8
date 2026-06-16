@@ -29,4 +29,4 @@ exclude =
     artifacts
 
 per-file-ignores =
-    notebooks/*.py: E128,E131,E231,E301,E302,E305,E401,E501,E731,F401,F541,F811,W292
+    notebooks/*.py: E127,E128,E131,E231,E301,E302,E305,E401,E501,E731,F401,F541,F811,W292

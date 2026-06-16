@@ -1,0 +1,51 @@
+{
+  "section": "phase_c_01",
+  "description": "Dummy/majority-class baselines \u2014 naive lower bound for each task. DummyClassifier(strategy='most_frequent') predicts one class for ALL samples; F1-macro is near zero for all non-majority classes by design. DummyRegressor(strategy='mean') always predicts the training mean; R2=0 by definition.",
+  "generated_at": "2026-06-16T09:29:21.051606",
+  "ticket_type": {
+    "algorithm": "DummyClassifier(strategy=most_frequent)",
+    "majority_class": "Refund request",
+    "majority_class_freq": 0.206815,
+    "val_f1_macro": 0.068493,
+    "val_f1_weighted": 0.070757,
+    "val_accuracy": 0.206612,
+    "val_roc_auc": 0.5,
+    "test_f1_macro": 0.068655,
+    "test_f1_weighted": 0.071127,
+    "test_accuracy": 0.207202,
+    "test_roc_auc": 0.5,
+    "mlflow_run_id": "bd5f34438578426f8c98ee45e3e47876",
+    "mlflow_experiment": "csip-baseline-classifiers"
+  },
+  "ticket_priority": {
+    "algorithm": "DummyClassifier(strategy=most_frequent)",
+    "majority_class": "Medium",
+    "majority_class_freq": 0.256242,
+    "val_f1_macro": 0.10272,
+    "val_f1_weighted": 0.106237,
+    "val_accuracy": 0.25856,
+    "val_roc_auc": 0.5,
+    "test_f1_macro": 0.10568,
+    "test_f1_weighted": 0.113291,
+    "test_accuracy": 0.268005,
+    "test_roc_auc": 0.5,
+    "mlflow_run_id": "baf63a3d33ec41e5ba9b6448baeaea80",
+    "mlflow_experiment": "csip-baseline-classifiers"
+  },
+  "resolution_time": {
+    "algorithm": "DummyRegressor(strategy=mean)",
+    "train_mean_hours": 11.826532,
+    "val_rmse": 7.060752,
+    "val_mae": 6.157099,
+    "val_r2": -0.002337,
+    "val_mape": 2.853013,
+    "val_rmsle": 0.810598,
+    "test_rmse": 6.988077,
+    "test_mae": 6.153386,
+    "test_r2": -0.000185,
+    "test_mape": 3.622836,
+    "test_rmsle": 0.762256,
+    "mlflow_run_id": "c6bcf8d2650a454488aa325b28c9b847",
+    "mlflow_experiment": "csip-regression-models"
+  }
+}
