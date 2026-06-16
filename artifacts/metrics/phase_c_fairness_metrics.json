@@ -1,0 +1,124 @@
+{
+  "section": "phase_c_02",
+  "description": "Fairness/segment error breakdown \u2014 XGB priority classifier on test set",
+  "generated_at": "2026-06-16T09:30:24.887990",
+  "caveat": "IMPORTANT: Overall model F1-macro = 0.251 (XGB priority, test set). This is near the 4-class uniform noise floor (~0.25). Segment-level differences reflect statistical noise, NOT systematic model discrimination. This analysis establishes a reproducible baseline for future comparison once a stronger model is trained.",
+  "model": "xgb_priority_classifier",
+  "overall_f1_macro": 0.251333,
+  "n_test_samples": 1694,
+  "reliability_threshold_n": 50,
+  "dimensions": {
+    "gender": {
+      "Female": {
+        "n": 577,
+        "reliable": true,
+        "f1_macro": 0.2712,
+        "f1_critical": 0.2947,
+        "f1_high": 0.2264,
+        "f1_low": 0.303,
+        "f1_medium": 0.2606
+      },
+      "Male": {
+        "n": 568,
+        "reliable": true,
+        "f1_macro": 0.231,
+        "f1_critical": 0.1648,
+        "f1_high": 0.2848,
+        "f1_low": 0.2134,
+        "f1_medium": 0.2611
+      },
+      "Other": {
+        "n": 549,
+        "reliable": true,
+        "f1_macro": 0.2462,
+        "f1_critical": 0.3056,
+        "f1_high": 0.203,
+        "f1_low": 0.2286,
+        "f1_medium": 0.2475
+      }
+    },
+    "age_band": {
+      "18-30": {
+        "n": 433,
+        "reliable": true,
+        "f1_macro": 0.2321,
+        "f1_critical": 0.2041,
+        "f1_high": 0.2233,
+        "f1_low": 0.2477,
+        "f1_medium": 0.2532
+      },
+      "31-45": {
+        "n": 461,
+        "reliable": true,
+        "f1_macro": 0.2439,
+        "f1_critical": 0.2243,
+        "f1_high": 0.2241,
+        "f1_low": 0.2512,
+        "f1_medium": 0.2759
+      },
+      "46-60": {
+        "n": 472,
+        "reliable": true,
+        "f1_macro": 0.2583,
+        "f1_critical": 0.3154,
+        "f1_high": 0.2616,
+        "f1_low": 0.2211,
+        "f1_medium": 0.2353
+      },
+      "61+": {
+        "n": 328,
+        "reliable": true,
+        "f1_macro": 0.2679,
+        "f1_critical": 0.2649,
+        "f1_high": 0.255,
+        "f1_low": 0.2907,
+        "f1_medium": 0.2609
+      }
+    },
+    "channel": {
+      "Chat": {
+        "n": 428,
+        "reliable": true,
+        "f1_macro": 0.2395,
+        "f1_critical": 0.2,
+        "f1_high": 0.2593,
+        "f1_low": 0.2083,
+        "f1_medium": 0.2903
+      },
+      "Email": {
+        "n": 431,
+        "reliable": true,
+        "f1_macro": 0.267,
+        "f1_critical": 0.3176,
+        "f1_high": 0.2211,
+        "f1_low": 0.2749,
+        "f1_medium": 0.2544
+      },
+      "Phone": {
+        "n": 429,
+        "reliable": true,
+        "f1_macro": 0.2442,
+        "f1_critical": 0.2475,
+        "f1_high": 0.2286,
+        "f1_low": 0.2,
+        "f1_medium": 0.3008
+      },
+      "Social media": {
+        "n": 406,
+        "reliable": true,
+        "f1_macro": 0.24,
+        "f1_critical": 0.2537,
+        "f1_high": 0.2488,
+        "f1_low": 0.3113,
+        "f1_medium": 0.1461
+      }
+    }
+  },
+  "charts": {
+    "gender": "phase_c_fairness_gender.png",
+    "age_band": "phase_c_fairness_age.png",
+    "channel": "phase_c_fairness_channel.png"
+  },
+  "mlflow_run_id": "016d5bbade8045828215a25177e88203",
+  "mlflow_experiment": "csip-explainability"
+}

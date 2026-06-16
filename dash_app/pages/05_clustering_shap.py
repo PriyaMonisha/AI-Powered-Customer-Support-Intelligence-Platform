@@ -1,7 +1,7 @@
 # filename: dash_app/pages/05_clustering_shap.py
 # purpose:  Clustering & Explainability page — static galleries of the Section 8b
-#           K-Means/PCA/t-SNE charts and the Section 8c SHAP explainability charts.
-# version:  1.0
+#           K-Means/PCA/t-SNE charts, Section 8c SHAP, and Phase C fairness breakdown.
+# version:  1.1
 
 import dash_bootstrap_components as dbc
 from dash import html, register_page
@@ -31,6 +31,18 @@ ATTENTION_CHARTS = [
     ("distilbert_attention_wrong.png", "DistilBERT [CLS] Attention — misclassified example (token-level, by layer)"),
 ]
 
+FAIRNESS_CHARTS = [
+    ("phase_c_fairness_gender.png",  "Priority F1 by Customer Gender (Female/Male/Other)"),
+    ("phase_c_fairness_age.png",     "Priority F1 by Customer Age Band (18-30 / 31-45 / 46-60 / 61+)"),
+    ("phase_c_fairness_channel.png", "Priority F1 by Ticket Channel (Chat / Email / Phone / Social media)"),
+]
+
+_FAIRNESS_CAVEAT = (
+    "Overall XGB priority F1-macro ≈ 0.25 (test set, 4-class noise floor). "
+    "Segment differences shown here reflect statistical noise, not model discrimination. "
+    "This is a reproducible baseline for future comparison once a stronger model is available."
+)
+
 
 def _chart_card(filename: str, caption: str) -> dbc.Card:
     if chart_exists(filename):
@@ -57,6 +69,9 @@ def layout():
             _gallery(SHAP_CHARTS),
             html.H5("DistilBERT Attention Visualization (Section 9b)", className="mt-4"),
             _gallery(ATTENTION_CHARTS),
+            html.H5("Fairness / Segment Error Breakdown (Phase C)", className="mt-4"),
+            dbc.Alert(_FAIRNESS_CAVEAT, color="info", className="mb-3"),
+            _gallery(FAIRNESS_CHARTS),
         ],
         fluid=True,
         className="py-3",
